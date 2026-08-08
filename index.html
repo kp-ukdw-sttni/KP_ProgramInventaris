@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Inventaris STT Nazarene Indonesia</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div>
+        <h1>Sistem Inventaris Sarana &amp; Prasarana</h1>
+        <p class="subtitle">STT Nazarene Indonesia &mdash; Daftar per 1 Juli 2020</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <h2>Lokasi / Ruangan</h2>
+      </div>
+      <ul id="roomList" class="room-list"></ul>
+    </aside>
+
+    <section class="content">
+      <div id="stats" class="stats"></div>
+
+      <div class="toolbar">
+        <button id="addBtn" type="button" class="btn-primary">Tambah Fasilitas</button>
+        <input id="searchInput" type="text" placeholder="Cari fasilitas, kode, atau ruangan..." autocomplete="off">
+        <select id="conditionFilter" aria-label="Filter kondisi">
+          <option value="all">Semua Kondisi</option>
+          <option value="Baik">Baik</option>
+          <option value="Kurang Baik">Kurang Baik</option>
+          <option value="Rusak">Rusak</option>
+          <option value="Lainnya">Lainnya / N/A</option>
+        </select>
+        <button id="clearBtn" type="button">Reset Filter</button>
+        <button id="resetDataBtn" type="button" class="btn-danger-outline">Reset Data</button>
+        <span id="resultCount" class="result-count"></span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Ruangan</th>
+              <th>Nama Fasilitas</th>
+              <th>Jumlah Unit</th>
+              <th>Kode Inventaris</th>
+              <th>Kondisi</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="modalOverlay" class="modal-overlay hidden">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <h3 id="modalTitle">Tambah Fasilitas</h3>
+        <button id="modalCloseBtn" class="modal-close" type="button" aria-label="Tutup">&times;</button>
+      </div>
+      <form id="modalForm">
+        <label>
+          Ruangan
+          <input id="fRoom" type="text" list="roomDataList" placeholder="cth: Ruang Kelas A" required>
+        </label>
+        <label>
+          Nama Fasilitas
+          <input id="fName" type="text" placeholder="cth: Kursi" required>
+        </label>
+        <label>
+          Jumlah Unit
+          <input id="fQty" type="text" placeholder="cth: 3, 30m, -">
+        </label>
+        <label>
+          Kode Inventaris
+          <input id="fCode" type="text" placeholder="cth: 01.04.27.1990">
+        </label>
+        <label>
+          Kondisi
+          <input id="fCondition" type="text" list="conditionDataList" placeholder="cth: Baik, Rusak">
+        </label>
+        <div class="modal-actions">
+          <button type="button" id="modalCancelBtn" class="btn-plain">Batal</button>
+          <button type="submit" class="btn-primary">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <datalist id="roomDataList"></datalist>
+  <datalist id="conditionDataList"></datalist>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
