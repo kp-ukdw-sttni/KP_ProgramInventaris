@@ -23,13 +23,14 @@
                 </div>
             </div>
 
-            <!-- Stats Grid -->
+            <!-- Stat Cards -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <!-- Total Barang -->
+                <!-- Total Aset -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-150 p-6 flex items-center justify-between hover:shadow-md transition-shadow">
                     <div>
-                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Barang / Aset</p>
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Aset / Item</p>
                         <h4 class="text-3xl font-extrabold text-blue-600 mt-2">{{ $totalBarang }}</h4>
+                        <p class="text-xs text-gray-400 mt-1">Seluruh unit ber-kode</p>
                     </div>
                     <div class="p-3 bg-blue-50 text-blue-600 rounded-lg">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -43,6 +44,7 @@
                     <div>
                         <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Ruangan / Unit Kerja</p>
                         <h4 class="text-3xl font-extrabold text-blue-600 mt-2">{{ $totalRuangan }}</h4>
+                        <p class="text-xs text-gray-400 mt-1">Lokasi penempatan</p>
                     </div>
                     <div class="p-3 bg-blue-50 text-blue-600 rounded-lg">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -56,6 +58,7 @@
                     <div>
                         <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Aset Kondisi Baik</p>
                         <h4 class="text-3xl font-extrabold text-emerald-600 mt-2">{{ $kondisiBaik }}</h4>
+                        <p class="text-xs text-gray-400 mt-1">{{ $persentaseBaik }}% dari total aset</p>
                     </div>
                     <div class="p-3 bg-emerald-50 text-emerald-600 rounded-lg">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -69,11 +72,86 @@
                     <div>
                         <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Aset Rusak / Mati</p>
                         <h4 class="text-3xl font-extrabold text-rose-600 mt-2">{{ $kondisiRusak }}</h4>
+                        <p class="text-xs text-gray-400 mt-1">{{ $persentaseRusak }}% dari total aset</p>
                     </div>
                     <div class="p-3 bg-rose-50 text-rose-600 rounded-lg">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ringkasan Kondisi -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-150 p-6">
+                    <h3 class="text-lg font-bold text-gray-700 mb-4">Ringkasan Status Kondisi</h3>
+                    <div class="space-y-4">
+                        @php
+                            $barColors = [
+                                'Baik' => 'bg-emerald-500',
+                                'Kurang Baik' => 'bg-amber-500',
+                                'Rusak' => 'bg-orange-500',
+                                'Mati' => 'bg-rose-500',
+                            ];
+                            $dotColors = [
+                                'Baik' => 'bg-emerald-500',
+                                'Kurang Baik' => 'bg-amber-500',
+                                'Rusak' => 'bg-orange-500',
+                                'Mati' => 'bg-rose-500',
+                            ];
+                        @endphp
+                        @foreach($kondisis as $kondisi)
+                            <div>
+                                <div class="flex items-center justify-between text-sm mb-1">
+                                    <span class="inline-flex items-center text-gray-700 font-medium">
+                                        <span class="w-2 h-2 mr-2 rounded-full {{ $dotColors[$kondisi] }}"></span>
+                                        {{ $kondisi }}
+                                    </span>
+                                    <span class="text-gray-500">
+                                        {{ $kondisiCounts[$kondisi] ?? 0 }} unit ({{ $kondisiPercentages[$kondisi] }}%)
+                                    </span>
+                                </div>
+                                <div class="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="h-full {{ $barColors[$kondisi] }} rounded-full transition-all" style="width: {{ min(100, $kondisiPercentages[$kondisi]) }}%"></div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <div class="mt-6 p-4 rounded-lg bg-gray-50 border border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-semibold text-gray-600">Tingkat Kelayakan (Baik + Kurang Baik)</span>
+                            <span class="text-sm font-bold text-blue-600">{{ $persentaseLayak }}%</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-white rounded-full overflow-hidden mt-2 border border-gray-200">
+                            <div class="h-full bg-blue-500 rounded-full" style="width: {{ min(100, $persentaseLayak) }}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Distribusi per Kategori -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-150 p-6">
+                    <h3 class="text-lg font-bold text-gray-700 mb-4">Distribusi Aset per Kategori</h3>
+                    <div class="space-y-4">
+                        @forelse($kategoris as $kategori)
+                            <div>
+                                <div class="flex items-center justify-between text-sm mb-1">
+                                    <span class="text-gray-700 font-medium">{{ $kategori['nama'] }}</span>
+                                    <span class="text-gray-500">{{ $kategori['total'] }} unit ({{ $kategori['persentase'] }}%)</span>
+                                </div>
+                                <div class="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-indigo-500 rounded-full transition-all" style="width: {{ min(100, $kategori['persentase']) }}%"></div>
+                                </div>
+                            </div>
+                        @empty
+                            <p class="text-sm text-gray-400">Belum ada kategori aset terdaftar.</p>
+                        @endforelse
+                    </div>
+
+                    <div class="mt-6 flex items-center justify-between p-4 rounded-lg bg-blue-50 border border-blue-100">
+                        <span class="text-sm font-semibold text-blue-800">Total seluruh unit aset</span>
+                        <span class="text-sm font-bold text-blue-700">{{ $totalBarang }} unit</span>
                     </div>
                 </div>
             </div>

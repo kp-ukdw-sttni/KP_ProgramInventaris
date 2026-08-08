@@ -73,15 +73,30 @@ class BarangController extends Controller
             'ruangan_id' => ['required', 'exists:ruangan,id'],
             'kategori_id' => ['nullable', 'exists:kategori_barang,id'],
             'nama_fasilitas' => ['required', 'string', 'max:255'],
-            'jumlah' => ['required', 'integer', 'min:1'],
-            'kode_inventaris' => ['nullable', 'string', 'unique:barang,kode_inventaris', 'max:255'],
+            'jumlah' => ['required', 'integer', 'min:1', 'max:500'],
             'kondisi' => ['required', Rule::in(['Baik', 'Kurang Baik', 'Rusak', 'Mati'])],
             'keterangan' => ['nullable', 'string'],
         ]);
 
-        Barang::create($validated);
+        $ruangan = Ruangan::findOrFail($validated['ruangan_id']);
+        $prefix = Barang::kodePrefix($ruangan);
+        $seq = Barang::nextSequence($ruangan);
 
-        return redirect()->route('barang.index')->with('success', 'Barang berhasil ditambahkan!');
+        for ($i = 1; $i <= $validated['jumlah']; $i++) {
+            Barang::create([
+                'ruangan_id' => $validated['ruangan_id'],
+                'kategori_id' => $validated['kategori_id'] ?? null,
+                'nama_fasilitas' => $validated['jumlah'] > 1
+                    ? $validated['nama_fasilitas'] . ' ' . $i
+                    : $validated['nama_fasilitas'],
+                'kode_inventaris' => Barang::formatKode($prefix, $seq++),
+                'kondisi' => $validated['kondisi'],
+                'keterangan' => $validated['keterangan'] ?? null,
+            ]);
+        }
+
+        return redirect()->route('barang.index')
+            ->with('success', $validated['jumlah'] . ' unit barang berhasil ditambahkan, masing-masing dengan kode inventaris unik.');
     }
 
     /**
@@ -105,13 +120,6 @@ class BarangController extends Controller
             'ruangan_id' => ['required', 'exists:ruangan,id'],
             'kategori_id' => ['nullable', 'exists:kategori_barang,id'],
             'nama_fasilitas' => ['required', 'string', 'max:255'],
-            'jumlah' => ['required', 'integer', 'min:1'],
-            'kode_inventaris' => [
-                'nullable',
-                'string',
-                Rule::unique('barang', 'kode_inventaris')->ignore($barang->id),
-                'max:255'
-            ],
             'kondisi' => ['required', Rule::in(['Baik', 'Kurang Baik', 'Rusak', 'Mati'])],
             'keterangan' => ['nullable', 'string'],
         ]);

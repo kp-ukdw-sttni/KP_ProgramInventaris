@@ -86,14 +86,17 @@
                         <div>
                             <x-input-label for="jumlah" :value="__('Jumlah Unit')" />
                             <x-text-input id="jumlah" name="jumlah" type="number" class="mt-1 block w-full focus:border-blue-500 focus:ring-blue-500" :value="old('jumlah', 1)" min="1" required />
+                            <p class="mt-1 text-xs text-gray-400">Setiap unit akan dibuat terpisah dengan kode inventaris uniknya sendiri.</p>
                             <x-input-error class="mt-2" :messages="$errors->get('jumlah')" />
                         </div>
 
-                        <!-- Kode Inventaris -->
+                        <!-- Kode Inventaris (Auto) -->
                         <div class="md:col-span-2">
-                            <x-input-label for="kode_inventaris" :value="__('Kode Inventaris Unik')" />
-                            <x-text-input id="kode_inventaris" name="kode_inventaris" type="text" class="mt-1 block w-full focus:border-blue-500 focus:ring-blue-500" :value="old('kode_inventaris')" placeholder="Contoh: INV-KAPEL-001" />
-                            <x-input-error class="mt-2" :messages="$errors->get('kode_inventaris')" />
+                            <x-input-label :value="__('Kode Inventaris')" />
+                            <div class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-200 text-gray-500 rounded-md text-sm">
+                                {{ __('Dibuat otomatis per unit (berdasarkan ruangan)') }}
+                            </div>
+                            <p class="mt-1 text-xs text-gray-400">Contoh: Meja di Ruang Ketua menghasilkan INV-RUANGKETUA-001, INV-RUANGKETUA-002, dan seterusnya.</p>
                         </div>
                     </div>
 

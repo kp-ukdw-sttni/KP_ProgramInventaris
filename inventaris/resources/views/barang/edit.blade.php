@@ -82,20 +82,11 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <!-- Jumlah -->
-                        <div>
-                            <x-input-label for="jumlah" :value="__('Jumlah Unit')" />
-                            <x-text-input id="jumlah" name="jumlah" type="number" class="mt-1 block w-full focus:border-blue-500 focus:ring-blue-500" :value="old('jumlah', $barang->jumlah)" min="1" required />
-                            <x-input-error class="mt-2" :messages="$errors->get('jumlah')" />
-                        </div>
-
-                        <!-- Kode Inventaris -->
-                        <div class="md:col-span-2">
-                            <x-input-label for="kode_inventaris" :value="__('Kode Inventaris Unik')" />
-                            <x-text-input id="kode_inventaris" name="kode_inventaris" type="text" class="mt-1 block w-full focus:border-blue-500 focus:ring-blue-500" :value="old('kode_inventaris', $barang->kode_inventaris)" />
-                            <x-input-error class="mt-2" :messages="$errors->get('kode_inventaris')" />
-                        </div>
+                    <!-- Kode Inventaris (Read-only) -->
+                    <div>
+                        <x-input-label :value="__('Kode Inventaris')" />
+                        <p class="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-200 text-gray-700 rounded-md text-sm font-mono">{{ $barang->kode_inventaris }}</p>
+                        <p class="mt-1 text-xs text-gray-400">Kode tidak dapat diubah agar tetap unik untuk setiap item.</p>
                     </div>
 
                     <!-- Kondisi -->

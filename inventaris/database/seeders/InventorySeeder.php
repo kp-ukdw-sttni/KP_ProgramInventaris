@@ -67,7 +67,7 @@ class InventorySeeder extends Seeder
             $createdKategoris[$k['nama_kategori']] = KategoriBarang::create($k);
         }
 
-        // 3. Seed Assets (Barang)
+        // 3. Seed Assets (Barang) - one record per unit, each with its own kode
         $barangs = [
             // Ruang Ketua
             [
@@ -75,7 +75,6 @@ class InventorySeeder extends Seeder
                 'kategori_id' => $createdKategoris['Mebel & Interior']->id,
                 'nama_fasilitas' => 'Meja Kerja Eksekutif Kayu Jati',
                 'jumlah' => 1,
-                'kode_inventaris' => 'INV-REK-001',
                 'kondisi' => 'Baik',
                 'keterangan' => 'Meja kayu jati ukiran Jepara.',
             ],
@@ -84,7 +83,6 @@ class InventorySeeder extends Seeder
                 'kategori_id' => $createdKategoris['Mebel & Interior']->id,
                 'nama_fasilitas' => 'Kursi Kerja Direktur Kulit Hitam',
                 'jumlah' => 1,
-                'kode_inventaris' => 'INV-REK-002',
                 'kondisi' => 'Baik',
                 'keterangan' => 'Kursi hidrolik dengan sandaran tinggi.',
             ],
@@ -93,7 +91,6 @@ class InventorySeeder extends Seeder
                 'kategori_id' => $createdKategoris['Elektronik']->id,
                 'nama_fasilitas' => 'AC Split Daikin 1 PK',
                 'jumlah' => 1,
-                'kode_inventaris' => 'INV-REK-003',
                 'kondisi' => 'Baik',
                 'keterangan' => 'Pemeliharaan berkala setiap 3 bulan.',
             ],
@@ -104,7 +101,6 @@ class InventorySeeder extends Seeder
                 'kategori_id' => $createdKategoris['Elektronik']->id,
                 'nama_fasilitas' => 'PC Client Lenovo ThinkCentre',
                 'jumlah' => 25,
-                'kode_inventaris' => 'INV-LAB-001',
                 'kondisi' => 'Baik',
                 'keterangan' => 'Spesifikasi Core i5, RAM 8GB, SSD 256GB.',
             ],
@@ -113,7 +109,6 @@ class InventorySeeder extends Seeder
                 'kategori_id' => $createdKategoris['Elektronik']->id,
                 'nama_fasilitas' => 'Router Switch Cisco 24 Port',
                 'jumlah' => 2,
-                'kode_inventaris' => 'INV-LAB-002',
                 'kondisi' => 'Baik',
                 'keterangan' => 'Switch utama jaringan Lab.',
             ],
@@ -122,7 +117,6 @@ class InventorySeeder extends Seeder
                 'kategori_id' => $createdKategoris['Mebel & Interior']->id,
                 'nama_fasilitas' => 'Kursi Kerja Ergonomis Staff',
                 'jumlah' => 26,
-                'kode_inventaris' => 'INV-LAB-003',
                 'kondisi' => 'Kurang Baik',
                 'keterangan' => '4 unit kursi hidroliknya macet.',
             ],
@@ -133,7 +127,6 @@ class InventorySeeder extends Seeder
                 'kategori_id' => $createdKategoris['Media Pembelajaran & Sound System']->id,
                 'nama_fasilitas' => 'Projector Epson EB-X400',
                 'jumlah' => 1,
-                'kode_inventaris' => 'INV-KLA-001',
                 'kondisi' => 'Baik',
                 'keterangan' => 'Termasuk bracket gantung dan remote.',
             ],
@@ -142,7 +135,6 @@ class InventorySeeder extends Seeder
                 'kategori_id' => $createdKategoris['Mebel & Interior']->id,
                 'nama_fasilitas' => 'Kursi Kuliahan Chitose',
                 'jumlah' => 40,
-                'kode_inventaris' => 'INV-KLA-002',
                 'kondisi' => 'Baik',
                 'keterangan' => 'Kursi lipat dengan meja tulis tempel.',
             ],
@@ -151,7 +143,6 @@ class InventorySeeder extends Seeder
                 'kategori_id' => $createdKategoris['Elektronik']->id,
                 'nama_fasilitas' => 'Kipas Angin Dinding Cosmos 16"',
                 'jumlah' => 2,
-                'kode_inventaris' => 'INV-KLA-003',
                 'kondisi' => 'Rusak',
                 'keterangan' => '1 unit tidak bisa berputar kiri-kanan.',
             ],
@@ -162,7 +153,6 @@ class InventorySeeder extends Seeder
                 'kategori_id' => $createdKategoris['Elektronik']->id,
                 'nama_fasilitas' => 'Printer Epson L3210 AIO',
                 'jumlah' => 1,
-                'kode_inventaris' => 'INV-PRODITEOL-001',
                 'kondisi' => 'Baik',
                 'keterangan' => 'Fasilitas cetak naskah & administrasi prodi.',
             ],
@@ -171,7 +161,6 @@ class InventorySeeder extends Seeder
                 'kategori_id' => $createdKategoris['Mebel & Interior']->id,
                 'nama_fasilitas' => 'Lemari Dokumen Kaca Lion',
                 'jumlah' => 2,
-                'kode_inventaris' => 'INV-PRODITEOL-002',
                 'kondisi' => 'Baik',
                 'keterangan' => 'Lemari arsip prodi pintu geser.',
             ],
@@ -182,7 +171,6 @@ class InventorySeeder extends Seeder
                 'kategori_id' => $createdKategoris['Media Pembelajaran & Sound System']->id,
                 'nama_fasilitas' => 'Sound System Speaker Yamaha DBR15',
                 'jumlah' => 4,
-                'kode_inventaris' => 'INV-KAPEL-001',
                 'kondisi' => 'Baik',
                 'keterangan' => 'Speaker aktif berkekuatan tinggi.',
             ],
@@ -191,7 +179,6 @@ class InventorySeeder extends Seeder
                 'kategori_id' => $createdKategoris['Media Pembelajaran & Sound System']->id,
                 'nama_fasilitas' => 'Mixer Audio Behringer 24-Input',
                 'jumlah' => 1,
-                'kode_inventaris' => 'INV-KAPEL-002',
                 'kondisi' => 'Baik',
                 'keterangan' => 'Terletak di ruang kontrol audio.',
             ],
@@ -200,7 +187,6 @@ class InventorySeeder extends Seeder
                 'kategori_id' => $createdKategoris['Mebel & Interior']->id,
                 'nama_fasilitas' => 'Mimbar Khotbah Kayu Jati STTNI',
                 'jumlah' => 1,
-                'kode_inventaris' => 'INV-KAPEL-003',
                 'kondisi' => 'Baik',
                 'keterangan' => 'Mimbar liturgis custom lambang STTNI.',
             ],
@@ -209,7 +195,6 @@ class InventorySeeder extends Seeder
                 'kategori_id' => $createdKategoris['Elektronik']->id,
                 'nama_fasilitas' => 'AC Floor Standing Polytron 5 PK',
                 'jumlah' => 2,
-                'kode_inventaris' => 'INV-KAPEL-004',
                 'kondisi' => 'Mati',
                 'keterangan' => '1 unit mati total akibat korsleting sekring.',
             ],
@@ -220,7 +205,6 @@ class InventorySeeder extends Seeder
                 'kategori_id' => $createdKategoris['Mebel & Interior']->id,
                 'nama_fasilitas' => 'Rak Buku Dua Sisi Besi',
                 'jumlah' => 12,
-                'kode_inventaris' => 'INV-PERPUS-001',
                 'kondisi' => 'Baik',
                 'keterangan' => 'Penyimpanan buku-buku referensi teologi.',
             ],
@@ -229,7 +213,6 @@ class InventorySeeder extends Seeder
                 'kategori_id' => $createdKategoris['Elektronik']->id,
                 'nama_fasilitas' => 'Barcode Scanner Sirkulasi Buku',
                 'jumlah' => 3,
-                'kode_inventaris' => 'INV-PERPUS-002',
                 'kondisi' => 'Baik',
                 'keterangan' => 'Scanner USB untuk layanan peminjaman.',
             ],
@@ -240,14 +223,26 @@ class InventorySeeder extends Seeder
                 'kategori_id' => $createdKategoris['Mebel & Interior']->id,
                 'nama_fasilitas' => 'Papan Informasi BEM Whiteboard',
                 'jumlah' => 1,
-                'kode_inventaris' => 'INV-BEM-001',
                 'kondisi' => 'Baik',
                 'keterangan' => 'Papan mading pengumuman mahasiswa.',
             ],
         ];
 
         foreach ($barangs as $b) {
-            Barang::create($b);
+            $ruangan = Ruangan::findOrFail($b['ruangan_id']);
+            $prefix = Barang::kodePrefix($ruangan);
+            $seq = Barang::nextSequence($ruangan);
+
+            for ($i = 1; $i <= $b['jumlah']; $i++) {
+                Barang::create([
+                    'ruangan_id' => $b['ruangan_id'],
+                    'kategori_id' => $b['kategori_id'],
+                    'nama_fasilitas' => $b['jumlah'] > 1 ? $b['nama_fasilitas'] . ' ' . $i : $b['nama_fasilitas'],
+                    'kode_inventaris' => Barang::formatKode($prefix, $seq++),
+                    'kondisi' => $b['kondisi'],
+                    'keterangan' => $b['keterangan'],
+                ]);
+            }
         }
     }
 }
