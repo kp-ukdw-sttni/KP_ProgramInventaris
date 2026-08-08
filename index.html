@@ -20,6 +20,7 @@
     <aside class="sidebar">
       <div class="sidebar-head">
         <h2>Lokasi / Ruangan</h2>
+        <button id="manageRoomsBtn" type="button" class="sidebar-action" title="Kelola ruangan" aria-label="Kelola ruangan">+</button>
       </div>
       <ul id="roomList" class="room-list"></ul>
     </aside>
@@ -93,6 +94,22 @@
           <button type="submit" class="btn-primary">Simpan</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <div id="roomsModalOverlay" class="modal-overlay hidden">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="roomsModalTitle">
+      <div class="modal-head">
+        <h3 id="roomsModalTitle">Kelola Ruangan</h3>
+        <button id="roomsModalCloseBtn" class="modal-close" type="button" aria-label="Tutup">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="add-room-row">
+          <input id="newRoomInput" type="text" placeholder="Nama ruangan baru..." maxlength="120" autocomplete="off">
+          <button id="addRoomBtn" type="button" class="btn-primary">Tambah</button>
+        </div>
+        <ul id="manageRoomList" class="manage-room-list"></ul>
+      </div>
     </div>
   </div>
 

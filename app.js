@@ -2,6 +2,7 @@
   "use strict";
 
   const STORAGE_KEY = "sttni_inventory_v1";
+  const ROOMS_STORAGE_KEY = "sttni_rooms_v1";
   const COMMON_CONDITIONS = ["Baik", "Kurang Baik", "Rusak", "Mati", "Pengecatan", "Pindah SekUm", "Tdk dipakai", "-"];
 
   const state = {
@@ -12,6 +13,8 @@
   };
 
   let inventory = loadInventory();
+  let roomsList = loadRooms();
+  syncRooms();
 
   const roomListEl = document.getElementById("roomList");
   const statsEl = document.getElementById("stats");
@@ -36,6 +39,13 @@
   const roomDataListEl = document.getElementById("roomDataList");
   const conditionDataListEl = document.getElementById("conditionDataList");
 
+  const manageRoomsBtnEl = document.getElementById("manageRoomsBtn");
+  const roomsModalOverlayEl = document.getElementById("roomsModalOverlay");
+  const roomsModalCloseBtnEl = document.getElementById("roomsModalCloseBtn");
+  const newRoomInputEl = document.getElementById("newRoomInput");
+  const addRoomBtnEl = document.getElementById("addRoomBtn");
+  const manageRoomListEl = document.getElementById("manageRoomList");
+
   function loadInventory() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -57,6 +67,44 @@
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(inventory));
     } catch (e) {}
+  }
+
+  function loadRooms() {
+    try {
+      const raw = localStorage.getItem(ROOMS_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(function (r) { return typeof r === "string" && r.trim(); });
+        }
+      }
+    } catch (e) {}
+    return uniqueRooms(inventory);
+  }
+
+  function saveRooms() {
+    try {
+      localStorage.setItem(ROOMS_STORAGE_KEY, JSON.stringify(roomsList));
+    } catch (e) {}
+  }
+
+  function uniqueRooms(items) {
+    const set = new Set();
+    items.forEach(function (x) {
+      set.add(x.room);
+    });
+    return Array.from(set);
+  }
+
+  function syncRooms() {
+    const set = new Set(roomsList);
+    inventory.forEach(function (x) {
+      set.add(x.room);
+    });
+    roomsList = Array.from(set).sort(function (a, b) {
+      return a.localeCompare(b, "id");
+    });
+    saveRooms();
   }
 
   function nextId() {
@@ -85,14 +133,15 @@
     return m ? parseInt(m[1], 10) : 0;
   }
 
+  function roomCount(name) {
+    return inventory.reduce(function (sum, item) {
+      return sum + (item.room === name ? 1 : 0);
+    }, 0);
+  }
+
   function rooms() {
-    const map = new Map();
-    inventory.forEach(function (item) {
-      if (!map.has(item.room)) map.set(item.room, 0);
-      map.set(item.room, map.get(item.room) + 1);
-    });
-    return Array.from(map.entries()).sort(function (a, b) {
-      return a[0].localeCompare(b[0], "id");
+    return roomsList.map(function (r) {
+      return [r, roomCount(r)];
     });
   }
 
@@ -200,14 +249,9 @@
   }
 
   function renderDatalists() {
-    const roomSet = new Set();
-    inventory.forEach(function (x) {
-      roomSet.add(x.room);
-    });
-    roomDataListEl.innerHTML = Array.from(roomSet)
-      .sort(function (a, b) { return a.localeCompare(b, "id"); })
-      .map(function (r) { return '<option value="' + escapeAttr(r) + '"></option>'; })
-      .join("");
+    roomDataListEl.innerHTML = roomsList.map(function (r) {
+      return '<option value="' + escapeAttr(r) + '"></option>';
+    }).join("");
 
     conditionDataListEl.innerHTML = COMMON_CONDITIONS.map(function (c) {
       return '<option value="' + escapeAttr(c) + '"></option>';
@@ -237,6 +281,7 @@
   function addItem(data) {
     inventory.push(Object.assign({ id: nextId() }, data));
     saveInventory();
+    syncRooms();
     focusRoom(data.room);
   }
 
@@ -245,6 +290,7 @@
     if (idx === -1) return;
     inventory[idx] = Object.assign({}, inventory[idx], data);
     saveInventory();
+    syncRooms();
     focusRoom(data.room);
   }
 
@@ -254,6 +300,7 @@
     if (!confirm('Hapus "' + item.name + '" dari ' + item.room + "?")) return;
     inventory = inventory.filter(function (x) { return x.id !== id; });
     saveInventory();
+    syncRooms();
     render();
   }
 
@@ -284,6 +331,130 @@
     state.editingId = null;
   }
 
+  function openRoomsModal() {
+    renderManageRoomList();
+    roomsModalOverlayEl.classList.remove("hidden");
+    newRoomInputEl.focus();
+  }
+
+  function closeRoomsModal() {
+    roomsModalOverlayEl.classList.add("hidden");
+  }
+
+  function roomNameExists(name, ignore) {
+    return roomsList.some(function (r) {
+      return r.toLowerCase() === name.toLowerCase() && r !== ignore;
+    });
+  }
+
+  function addRoom(name) {
+    const n = name.trim();
+    if (!n) return;
+    if (roomNameExists(n)) {
+      alert('Ruangan "' + n + '" sudah ada.');
+      return;
+    }
+    roomsList.push(n);
+    syncRooms();
+    newRoomInputEl.value = "";
+    renderManageRoomList();
+    render();
+  }
+
+  function renameRoom(oldName, newName) {
+    const n = newName.trim();
+    if (!n || n === oldName) return;
+    if (roomNameExists(n, oldName)) {
+      alert('Ruangan "' + n + '" sudah ada.');
+      return;
+    }
+    inventory.forEach(function (item) {
+      if (item.room === oldName) item.room = n;
+    });
+    const idx = roomsList.indexOf(oldName);
+    if (idx !== -1) roomsList[idx] = n;
+    if (state.room === oldName) state.room = n;
+    saveInventory();
+    syncRooms();
+    renderManageRoomList();
+    render();
+  }
+
+  function deleteRoom(name) {
+    const count = roomCount(name);
+    const msg = count > 0
+      ? 'Hapus ruangan "' + name + '" beserta ' + count + ' item di dalamnya?'
+      : 'Hapus ruangan "' + name + '"?';
+    if (!confirm(msg)) return;
+    inventory = inventory.filter(function (x) { return x.room !== name; });
+    roomsList = roomsList.filter(function (r) { return r !== name; });
+    if (state.room === name) state.room = "all";
+    saveInventory();
+    saveRooms();
+    renderManageRoomList();
+    render();
+  }
+
+  function renderManageRoomList() {
+    let html = "";
+    if (roomsList.length === 0) {
+      html = '<li class="manage-room-empty">Belum ada ruangan.</li>';
+    }
+    roomsList.forEach(function (r) {
+      html += '<li class="manage-room-row" data-room="' + escapeAttr(r) + '">' +
+        '<span class="manage-room-name">' + escapeHtml(r) + '</span>' +
+        '<span class="manage-room-count">' + roomCount(r) + '</span>' +
+        '<div class="manage-room-actions">' +
+          '<button class="btn-row btn-edit" data-mroom="' + escapeAttr(r) + '" data-action="rename">Ubah</button>' +
+          '<button class="btn-row btn-danger" data-mroom="' + escapeAttr(r) + '" data-action="delete">Hapus</button>' +
+        '</div>' +
+        "</li>";
+    });
+    manageRoomListEl.innerHTML = html;
+  }
+
+  function startRename(room) {
+    Array.prototype.forEach.call(manageRoomListEl.querySelectorAll("li"), function (li) {
+      if (li.getAttribute("data-room") !== room) return;
+      const nameEl = li.querySelector(".manage-room-name");
+      const old = nameEl.textContent;
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "rename-input";
+      input.value = old;
+      input.maxLength = 120;
+
+      const actions = li.querySelector(".manage-room-actions");
+      actions.innerHTML = "";
+
+      const saveBtn = document.createElement("button");
+      saveBtn.type = "button";
+      saveBtn.className = "btn-row btn-edit";
+      saveBtn.textContent = "Simpan";
+      saveBtn.addEventListener("click", function () {
+        renameRoom(old, input.value);
+      });
+
+      const cancelBtn = document.createElement("button");
+      cancelBtn.type = "button";
+      cancelBtn.className = "btn-row";
+      cancelBtn.textContent = "Batal";
+      cancelBtn.addEventListener("click", renderManageRoomList);
+
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") renameRoom(old, input.value);
+        else if (e.key === "Escape") renderManageRoomList();
+      });
+
+      actions.appendChild(saveBtn);
+      actions.appendChild(cancelBtn);
+      nameEl.replaceWith(input);
+      input.focus();
+      input.select();
+    });
+  }
+
   searchInputEl.addEventListener("input", function () {
     state.query = searchInputEl.value;
     render();
@@ -306,6 +477,8 @@
   resetDataBtnEl.addEventListener("click", function () {
     if (!confirm("Kembalikan semua data ke kondisi awal dari file docx? Perubahan yang Anda buat akan hilang.")) return;
     inventory = seedData();
+    roomsList = uniqueRooms(inventory);
+    syncRooms();
     saveInventory();
     render();
   });
@@ -321,8 +494,37 @@
     if (e.target === modalOverlayEl) closeModal();
   });
 
+  manageRoomsBtnEl.addEventListener("click", openRoomsModal);
+  roomsModalCloseBtnEl.addEventListener("click", closeRoomsModal);
+
+  roomsModalOverlayEl.addEventListener("click", function (e) {
+    if (e.target === roomsModalOverlayEl) closeRoomsModal();
+  });
+
+  addRoomBtnEl.addEventListener("click", function () {
+    addRoom(newRoomInputEl.value);
+  });
+
+  newRoomInputEl.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addRoom(newRoomInputEl.value);
+    }
+  });
+
+  manageRoomListEl.addEventListener("click", function (e) {
+    const btn = e.target.closest("button[data-mroom]");
+    if (!btn) return;
+    const room = btn.getAttribute("data-mroom");
+    const action = btn.getAttribute("data-action");
+    if (action === "delete") deleteRoom(room);
+    else if (action === "rename") startRename(room);
+  });
+
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && !modalOverlayEl.classList.contains("hidden")) closeModal();
+    if (e.key !== "Escape") return;
+    if (!modalOverlayEl.classList.contains("hidden")) closeModal();
+    else if (!roomsModalOverlayEl.classList.contains("hidden")) closeRoomsModal();
   });
 
   modalFormEl.addEventListener("submit", function (e) {
