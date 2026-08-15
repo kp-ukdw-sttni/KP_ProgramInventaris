@@ -27,45 +27,62 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Ruangan dengan Pengelompokan STTNI -->
-                        <div>
-                            <x-input-label for="ruangan_id" :value="__('Ruangan / Lokasi Penempatan')" />
-                            <select id="ruangan_id" name="ruangan_id" class="mt-1 block w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm" required>
-                                <option value="">{{ __('Pilih Ruangan') }}</option>
-                                
-                                @php
-                                    $groupedRuangan = [
-                                        'Area Akademik & Kelas' => [],
-                                        'Area Program Studi & Pasca Sarjana' => [],
-                                        'Area Pimpinan & Rektorat' => [],
-                                        'Fasilitas Umum & Mahasiswa' => [],
-                                    ];
+                        <!-- Ruangan Multi-Pilih dengan Pengelompokan STTNI -->
+                        <div class="md:col-span-2">
+                            <x-input-label :value="__('Ruangan / Lokasi Penempatan')" />
+                            <p class="mt-1 text-xs text-gray-400">Pilih satu atau lebih ruangan. Barang akan dibuat di setiap ruangan yang dipilih tanpa input berulang.</p>
 
-                                    foreach($ruangans as $ruangan) {
-                                        $nama = $ruangan->nama_ruangan;
-                                        if (Illuminate\Support\Str::contains($nama, ['Kelas A', 'Kelas B', 'Kelas C', 'Kelas D', 'Kelas E', 'Laboratorium'])) {
-                                            $groupedRuangan['Area Akademik & Kelas'][] = $ruangan;
-                                        } elseif (Illuminate\Support\Str::contains($nama, ['Kaprodi', 'Sekretaris Prodi', 'Pasca Sarjana'])) {
-                                            $groupedRuangan['Area Program Studi & Pasca Sarjana'][] = $ruangan;
-                                        } elseif (Illuminate\Support\Str::contains($nama, ['Ketua', 'WK', 'Bendahara', 'Sekretaris Umum'])) {
-                                            $groupedRuangan['Area Pimpinan & Rektorat'][] = $ruangan;
-                                        } else {
-                                            $groupedRuangan['Fasilitas Umum & Mahasiswa'][] = $ruangan;
-                                        }
+                            @php
+                                $groupedRuangan = [
+                                    'Area Akademik & Kelas' => [],
+                                    'Area Program Studi & Pasca Sarjana' => [],
+                                    'Area Pimpinan & Rektorat' => [],
+                                    'Fasilitas Umum & Mahasiswa' => [],
+                                ];
+
+                                foreach($ruangans as $ruangan) {
+                                    $nama = $ruangan->nama_ruangan;
+                                    if (Illuminate\Support\Str::contains($nama, ['Kelas A', 'Kelas B', 'Kelas C', 'Kelas D', 'Kelas E', 'Laboratorium'])) {
+                                        $groupedRuangan['Area Akademik & Kelas'][] = $ruangan;
+                                    } elseif (Illuminate\Support\Str::contains($nama, ['Kaprodi', 'Sekretaris Prodi', 'Pasca Sarjana'])) {
+                                        $groupedRuangan['Area Program Studi & Pasca Sarjana'][] = $ruangan;
+                                    } elseif (Illuminate\Support\Str::contains($nama, ['Ketua', 'WK', 'Bendahara', 'Sekretaris Umum'])) {
+                                        $groupedRuangan['Area Pimpinan & Rektorat'][] = $ruangan;
+                                    } else {
+                                        $groupedRuangan['Fasilitas Umum & Mahasiswa'][] = $ruangan;
                                     }
-                                @endphp
+                                }
 
-                                @foreach($groupedRuangan as $groupLabel => $items)
-                                    @if(count($items) > 0)
-                                        <optgroup label="{{ $groupLabel }}">
-                                            @foreach($items as $ruangan)
-                                                <option value="{{ $ruangan->id }}" {{ old('ruangan_id') == $ruangan->id ? 'selected' : '' }}>{{ $ruangan->nama_ruangan }}</option>
-                                            @endforeach
-                                        </optgroup>
-                                    @endif
-                                @endforeach
-                            </select>
-                            <x-input-error class="mt-2" :messages="$errors->get('ruangan_id')" />
+                                $oldRuanganIds = old('ruangan_ids', []);
+                            @endphp
+
+                            <div class="mt-2 border border-gray-200 rounded-md bg-gray-50 p-4 max-h-72 overflow-y-auto">
+                                <label class="flex items-center space-x-2 text-sm text-gray-600 cursor-pointer hover:text-gray-900 mb-3 border-b border-gray-200 pb-3">
+                                    <input type="checkbox" id="selectAllRuangan" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                    <span class="font-medium">Pilih Semua Ruangan</span>
+                                </label>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    @foreach($groupedRuangan as $groupLabel => $items)
+                                        @if(count($items) > 0)
+                                            <div>
+                                                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{{ $groupLabel }}</p>
+                                                <div class="space-y-2">
+                                                    @foreach($items as $ruangan)
+                                                        <label class="flex items-start space-x-2 text-sm text-gray-700 cursor-pointer hover:text-gray-900 ruangan-check">
+                                                            <input type="checkbox" name="ruangan_ids[]" value="{{ $ruangan->id }}" class="ruangan-checkbox mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" {{ in_array($ruangan->id, $oldRuanganIds) ? 'checked' : '' }}>
+                                                            <span>{{ $ruangan->nama_ruangan }}</span>
+                                                        </label>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <p id="ruanganCount" class="mt-2 text-xs text-blue-600 font-medium"></p>
+                            <x-input-error class="mt-2" :messages="$errors->get('ruangan_ids')" />
                         </div>
 
                         <!-- Kategori -->
@@ -132,4 +149,30 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const selectAll = document.getElementById('selectAllRuangan');
+            const checkboxes = document.querySelectorAll('.ruangan-checkbox');
+            const countEl = document.getElementById('ruanganCount');
+
+            function updateCount() {
+                const checked = document.querySelectorAll('.ruangan-checkbox:checked').length;
+                countEl.textContent = checked > 0
+                    ? checked + ' ruangan terpilih — barang akan dibuat di setiap ruangan tersebut.'
+                    : '';
+                selectAll.checked = checked > 0 && checked === checkboxes.length;
+                selectAll.indeterminate = checked > 0 && checked < checkboxes.length;
+            }
+
+            selectAll.addEventListener('change', function () {
+                checkboxes.forEach(cb => { cb.checked = selectAll.checked; });
+                updateCount();
+            });
+
+            checkboxes.forEach(cb => cb.addEventListener('change', updateCount));
+
+            updateCount();
+        });
+    </script>
 </x-app-layout>

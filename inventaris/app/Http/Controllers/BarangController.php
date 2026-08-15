@@ -70,7 +70,8 @@ class BarangController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'ruangan_id' => ['required', 'exists:ruangan,id'],
+            'ruangan_ids' => ['required', 'array', 'min:1'],
+            'ruangan_ids.*' => ['exists:ruangan,id'],
             'kategori_id' => ['nullable', 'exists:kategori_barang,id'],
             'nama_fasilitas' => ['required', 'string', 'max:255'],
             'jumlah' => ['required', 'integer', 'min:1', 'max:500'],
@@ -78,25 +79,31 @@ class BarangController extends Controller
             'keterangan' => ['nullable', 'string'],
         ]);
 
-        $ruangan = Ruangan::findOrFail($validated['ruangan_id']);
-        $prefix = Barang::kodePrefix($ruangan);
-        $seq = Barang::nextSequence($ruangan);
+        $totalUnits = 0;
 
-        for ($i = 1; $i <= $validated['jumlah']; $i++) {
-            Barang::create([
-                'ruangan_id' => $validated['ruangan_id'],
-                'kategori_id' => $validated['kategori_id'] ?? null,
-                'nama_fasilitas' => $validated['jumlah'] > 1
-                    ? $validated['nama_fasilitas'] . ' ' . $i
-                    : $validated['nama_fasilitas'],
-                'kode_inventaris' => Barang::formatKode($prefix, $seq++),
-                'kondisi' => $validated['kondisi'],
-                'keterangan' => $validated['keterangan'] ?? null,
-            ]);
+        foreach ($validated['ruangan_ids'] as $ruanganId) {
+            $ruangan = Ruangan::findOrFail($ruanganId);
+            $prefix = Barang::kodePrefix($ruangan);
+            $seq = Barang::nextSequence($ruangan);
+
+            for ($i = 1; $i <= $validated['jumlah']; $i++) {
+                Barang::create([
+                    'ruangan_id' => $ruanganId,
+                    'kategori_id' => $validated['kategori_id'] ?? null,
+                    'nama_fasilitas' => $validated['jumlah'] > 1
+                        ? $validated['nama_fasilitas'] . ' ' . $i
+                        : $validated['nama_fasilitas'],
+                    'kode_inventaris' => Barang::formatKode($prefix, $seq++),
+                    'kondisi' => $validated['kondisi'],
+                    'keterangan' => $validated['keterangan'] ?? null,
+                ]);
+
+                $totalUnits++;
+            }
         }
 
         return redirect()->route('barang.index')
-            ->with('success', $validated['jumlah'] . ' unit barang berhasil ditambahkan, masing-masing dengan kode inventaris unik.');
+            ->with('success', $totalUnits . ' unit barang berhasil ditambahkan di ' . count($validated['ruangan_ids']) . ' ruangan, masing-masing dengan kode inventaris unik.');
     }
 
     /**

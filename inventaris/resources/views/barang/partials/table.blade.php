@@ -1,9 +1,9 @@
 @forelse($barangs as $barang)
     <tr class="hover:bg-gray-50 border-b border-gray-100 transition-colors duration-150">
-        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-700">
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-700 sticky left-0 z-20 bg-white hover:bg-gray-50 border-r border-gray-200 transition-colors duration-150 w-56">
             {{ $barang->kode_inventaris ?? '-' }}
         </td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium sticky left-56 z-10 bg-white hover:bg-gray-50 border-r border-gray-200 transition-colors duration-150">
             {{ $barang->nama_fasilitas }}
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
