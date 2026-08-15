@@ -18,6 +18,7 @@ class Barang extends Model
         'kategori_id',
         'nama_fasilitas',
         'kode_inventaris',
+        'tahun_pembelian',
         'kondisi',
         'keterangan',
     ];
@@ -45,7 +46,7 @@ class Barang extends Model
     {
         $nama = Str::upper(Str::replaceMatches('/[^A-Za-z0-9]/', '', $ruangan->nama_ruangan));
 
-        return 'INV-' . Str::limit($nama, 12, '');
+        return 'INV-' . $nama;
     }
 
     /**

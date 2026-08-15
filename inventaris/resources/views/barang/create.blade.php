@@ -108,12 +108,20 @@
                         </div>
 
                         <!-- Kode Inventaris (Auto) -->
-                        <div class="md:col-span-2">
+                        <div>
                             <x-input-label :value="__('Kode Inventaris')" />
                             <div class="mt-1 block w-full px-3 py-2 bg-gray-50 border border-gray-200 text-gray-500 rounded-md text-sm">
                                 {{ __('Dibuat otomatis per unit (berdasarkan ruangan)') }}
                             </div>
-                            <p class="mt-1 text-xs text-gray-400">Contoh: Meja di Ruang Ketua menghasilkan INV-RUANGKETUA-001, INV-RUANGKETUA-002, dan seterusnya.</p>
+                            <p class="mt-1 text-xs text-gray-400">Contoh: Meja di Ruang Ketua menghasilkan INV-RUANGKETUA-001, dan seterusnya.</p>
+                        </div>
+
+                        <!-- Tahun Pembelian -->
+                        <div>
+                            <x-input-label for="tahun_pembelian" :value="__('Tahun Pembelian')" />
+                            <x-text-input id="tahun_pembelian" name="tahun_pembelian" type="number" class="mt-1 block w-full focus:border-blue-500 focus:ring-blue-500" :value="old('tahun_pembelian')" min="1900" max="2100" placeholder="Contoh: 2015" />
+                            <p class="mt-1 text-xs text-gray-400">Opsional. Jika tidak diisi, kolom tahun dibiarkan kosong.</p>
+                            <x-input-error class="mt-2" :messages="$errors->get('tahun_pembelian')" />
                         </div>
                     </div>
 

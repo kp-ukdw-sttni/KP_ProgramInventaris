@@ -76,6 +76,7 @@ class BarangController extends Controller
             'nama_fasilitas' => ['required', 'string', 'max:255'],
             'jumlah' => ['required', 'integer', 'min:1', 'max:500'],
             'kondisi' => ['required', Rule::in(['Baik', 'Kurang Baik', 'Rusak', 'Mati'])],
+            'tahun_pembelian' => ['nullable', 'integer', 'between:1900,2100'],
             'keterangan' => ['nullable', 'string'],
         ]);
 
@@ -94,6 +95,7 @@ class BarangController extends Controller
                         ? $validated['nama_fasilitas'] . ' ' . $i
                         : $validated['nama_fasilitas'],
                     'kode_inventaris' => Barang::formatKode($prefix, $seq++),
+                    'tahun_pembelian' => $validated['tahun_pembelian'] ?? null,
                     'kondisi' => $validated['kondisi'],
                     'keterangan' => $validated['keterangan'] ?? null,
                 ]);
@@ -128,6 +130,7 @@ class BarangController extends Controller
             'kategori_id' => ['nullable', 'exists:kategori_barang,id'],
             'nama_fasilitas' => ['required', 'string', 'max:255'],
             'kondisi' => ['required', Rule::in(['Baik', 'Kurang Baik', 'Rusak', 'Mati'])],
+            'tahun_pembelian' => ['nullable', 'integer', 'between:1900,2100'],
             'keterangan' => ['nullable', 'string'],
         ]);
 

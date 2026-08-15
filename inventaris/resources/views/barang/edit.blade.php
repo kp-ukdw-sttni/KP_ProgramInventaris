@@ -89,16 +89,25 @@
                         <p class="mt-1 text-xs text-gray-400">Kode tidak dapat diubah agar tetap unik untuk setiap item.</p>
                     </div>
 
-                    <!-- Kondisi -->
-                    <div>
-                        <x-input-label for="kondisi" :value="__('Status Kondisi Fisik')" />
-                        <select id="kondisi" name="kondisi" class="mt-1 block w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm" required>
-                            <option value="">{{ __('Pilih Kondisi') }}</option>
-                            @foreach($kondisis as $kondisi)
-                                <option value="{{ $kondisi }}" {{ old('kondisi', $barang->kondisi) == $kondisi ? 'selected' : '' }}>{{ $kondisi }}</option>
-                            @endforeach
-                        </select>
-                        <x-input-error class="mt-2" :messages="$errors->get('kondisi')" />
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Tahun Pembelian -->
+                        <div>
+                            <x-input-label for="tahun_pembelian" :value="__('Tahun Pembelian')" />
+                            <x-text-input id="tahun_pembelian" name="tahun_pembelian" type="number" class="mt-1 block w-full focus:border-blue-500 focus:ring-blue-500" :value="old('tahun_pembelian', $barang->tahun_pembelian)" min="1900" max="2100" placeholder="Contoh: 2015" />
+                            <x-input-error class="mt-2" :messages="$errors->get('tahun_pembelian')" />
+                        </div>
+
+                        <!-- Kondisi -->
+                        <div>
+                            <x-input-label for="kondisi" :value="__('Status Kondisi Fisik')" />
+                            <select id="kondisi" name="kondisi" class="mt-1 block w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm" required>
+                                <option value="">{{ __('Pilih Kondisi') }}</option>
+                                @foreach($kondisis as $kondisi)
+                                    <option value="{{ $kondisi }}" {{ old('kondisi', $barang->kondisi) == $kondisi ? 'selected' : '' }}>{{ $kondisi }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('kondisi')" />
+                        </div>
                     </div>
 
                     <!-- Keterangan -->

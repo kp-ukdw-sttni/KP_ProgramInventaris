@@ -38,6 +38,15 @@
         <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate" title="{{ $barang->keterangan }}">
             {{ $barang->keterangan ?? '-' }}
         </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+            @if($barang->tahun_pembelian)
+                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-gray-50 text-gray-700 border border-gray-200">
+                    {{ $barang->tahun_pembelian }}
+                </span>
+            @else
+                <span class="text-gray-400">-</span>
+            @endif
+        </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
             <div class="inline-flex items-center space-x-2">
                 <a href="{{ route('barang.edit', $barang->id) }}" class="inline-flex items-center text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded-md transition-colors">
@@ -55,7 +64,7 @@
     </tr>
 @empty
     <tr>
-        <td colspan="7" class="px-6 py-10 whitespace-nowrap text-center text-sm text-gray-500">
+        <td colspan="8" class="px-6 py-10 whitespace-nowrap text-center text-sm text-gray-500">
             <div class="flex flex-col items-center justify-center space-y-2">
                 <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -68,7 +77,7 @@
 
 @if($barangs->hasPages())
     <tr>
-        <td colspan="7" class="px-6 py-4 bg-gray-50 border-t border-gray-100">
+        <td colspan="8" class="px-6 py-4 bg-gray-50 border-t border-gray-100">
             <div class="pagination-wrapper">
                 {{ $barangs->links() }}
             </div>
