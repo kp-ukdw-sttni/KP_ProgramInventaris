@@ -17,6 +17,37 @@ class RuanganController extends Controller
     }
 
     /**
+     * Display the asset breakdown of a room grouped by category and item type.
+     */
+    public function show(Ruangan $ruangan)
+    {
+        $perKategori = $ruangan->barangs()
+            ->selectRaw('kategori_id, COUNT(*) as total')
+            ->groupBy('kategori_id')
+            ->with('kategoriBarang')
+            ->get();
+
+        $totalBarang = $perKategori->sum('total');
+
+        $perNamaBarang = $ruangan->barangs()
+            ->pluck('nama_fasilitas')
+            ->map(fn ($nama) => static::baseNamaFasilitas($nama))
+            ->countBy()
+            ->sortDesc();
+
+        return view('ruangan.show', compact('ruangan', 'perKategori', 'perNamaBarang', 'totalBarang'));
+    }
+
+    /**
+     * Normalize a facility name by stripping the trailing unit sequence,
+     * e.g. "Kursi Kuliahan Chitose 1" -> "Kursi Kuliahan Chitose".
+     */
+    private static function baseNamaFasilitas(string $nama): string
+    {
+        return preg_replace('/\s+\d+\z/', '', $nama) ?: $nama;
+    }
+
+    /**
      * Show the form for creating a new room.
      */
     public function create()

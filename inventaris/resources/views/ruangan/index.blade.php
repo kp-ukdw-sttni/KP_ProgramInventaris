@@ -83,8 +83,13 @@
                                             {{ $ruangan->deskripsi ?? '-' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-bold text-gray-800">
-                                            <a href="{{ route('barang.index', ['ruangan_id' => $ruangan->id]) }}" class="hover:text-blue-600 transition underline">
+                                            <a href="{{ route('ruangan.show', $ruangan->id) }}"
+                                               title="Lihat rincian aset per kategori"
+                                               class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-900 hover:underline transition">
                                                 {{ $ruangan->barangs_count }} barang
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12" />
+                                                </svg>
                                             </a>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
