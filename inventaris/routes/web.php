@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\RuanganController;
+use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('barang', BarangController::class);
     Route::resource('ruangan', RuanganController::class);
+    Route::resource('kategori', KategoriController::class);
 });
 
 require __DIR__.'/auth.php';

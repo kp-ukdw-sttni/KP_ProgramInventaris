@@ -31,9 +31,9 @@
                 <div class="p-6 text-gray-900">
                     
                     <!-- Top Action Bar & Filters -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
                         <!-- Search Box -->
-                        <div class="md:col-span-2">
+                        <div class="md:col-span-3">
                             <x-input-label for="searchInput" :value="__('Cari Fasilitas / Kode')" />
                             <x-text-input id="searchInput" type="text" value="{{ request('search') }}" class="mt-1 block w-full shadow-sm placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500" placeholder="Cari nama fasilitas, barang, atau kode inventaris..." />
                         </div>
@@ -92,6 +92,17 @@
                                 @endforeach
                             </select>
                         </div>
+
+                        <!-- Filter Kategori -->
+                        <div>
+                            <x-input-label for="filterKategori" :value="__('Kategori')" />
+                            <select id="filterKategori" class="mt-1 block w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
+                                <option value="">{{ __('Semua Kategori') }}</option>
+                                @foreach($kategoris as $kategori)
+                                    <option value="{{ $kategori->id }}" @selected(request('kategori_id') == $kategori->id)>{{ $kategori->nama_kategori }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Table Container -->
@@ -143,6 +154,7 @@
             const searchInput = document.getElementById('searchInput');
             const filterRuangan = document.getElementById('filterRuangan');
             const filterKondisi = document.getElementById('filterKondisi');
+            const filterKategori = document.getElementById('filterKategori');
             const tableBody = document.getElementById('tableBody');
 
             let debounceTimer;
@@ -193,6 +205,10 @@
                     params.append('kondisi', filterKondisi.value);
                 }
 
+                if (filterKategori.value !== '') {
+                    params.append('kategori_id', filterKategori.value);
+                }
+
                 const url = `${window.location.pathname}?${params.toString()}`;
                 fetchData(url);
             }
@@ -206,6 +222,7 @@
             // change events trigger immediately
             filterRuangan.addEventListener('change', applyFilters);
             filterKondisi.addEventListener('change', applyFilters);
+            filterKategori.addEventListener('change', applyFilters);
 
             // AJAX Pagination link handler inside the tableBody container
             tableBody.addEventListener('click', function (e) {

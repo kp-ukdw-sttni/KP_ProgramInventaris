@@ -21,6 +21,9 @@
                     <x-nav-link :href="route('ruangan.index')" :active="request()->routeIs('ruangan.*')">
                         {{ __('Daftar Ruangan') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('kategori.index')" :active="request()->routeIs('kategori.*')">
+                        {{ __('Daftar Kategori') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -81,6 +84,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('ruangan.index')" :active="request()->routeIs('ruangan.*')">
                 {{ __('Daftar Ruangan') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('kategori.index')" :active="request()->routeIs('kategori.*')">
+                {{ __('Daftar Kategori') }}
             </x-responsive-nav-link>
         </div>
 

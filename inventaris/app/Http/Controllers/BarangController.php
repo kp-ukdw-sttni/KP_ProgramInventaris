@@ -31,6 +31,11 @@ class BarangController extends Controller
             $query->where('ruangan_id', $request->input('ruangan_id'));
         }
 
+        // Filter by kategori_id
+        if ($request->filled('kategori_id')) {
+            $query->where('kategori_id', $request->input('kategori_id'));
+        }
+
         // Filter by kondisi
         if ($request->filled('kondisi')) {
             $query->where('kondisi', $request->input('kondisi'));
