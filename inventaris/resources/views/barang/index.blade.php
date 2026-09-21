@@ -35,17 +35,21 @@
                         <!-- Search Box -->
                         <div class="md:col-span-2">
                             <x-input-label for="searchInput" :value="__('Cari Fasilitas / Kode')" />
-                            <x-text-input id="searchInput" type="text" class="mt-1 block w-full shadow-sm placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500" placeholder="Cari nama fasilitas, barang, atau kode inventaris..." />
+                            <x-text-input id="searchInput" type="text" value="{{ request('search') }}" class="mt-1 block w-full shadow-sm placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500" placeholder="Cari nama fasilitas, barang, atau kode inventaris..." />
                         </div>
 
                         <!-- Filter Ruangan (STTNI Categorized Option Group) -->
                         <div>
                             <x-input-label for="filterRuangan" :value="__('Klasifikasi Ruangan')" />
                             <select id="filterRuangan" class="mt-1 block w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
-                                <option value="">{{ __('Semua Ruangan') }}</option>
-                                
-                                @php
-                                    $groupedRuangan = [
+<option value="">{{ __('Semua Ruangan') }}</option>
+                
+                @php
+                    $selectedRuanganId = request()->query('ruangan_id');
+                @endphp
+
+                @php
+                    $groupedRuangan = [
                                         'Area Akademik & Kelas' => [],
                                         'Area Program Studi & Pasca Sarjana' => [],
                                         'Area Pimpinan & Rektorat' => [],
@@ -70,7 +74,7 @@
                                     @if(count($items) > 0)
                                         <optgroup label="{{ $groupLabel }}">
                                             @foreach($items as $ruangan)
-                                                <option value="{{ $ruangan->id }}">{{ $ruangan->nama_ruangan }}</option>
+                                                <option value="{{ $ruangan->id }}" @selected($selectedRuanganId == $ruangan->id)>{{ $ruangan->nama_ruangan }}</option>
                                             @endforeach
                                         </optgroup>
                                     @endif
@@ -84,7 +88,7 @@
                             <select id="filterKondisi" class="mt-1 block w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
                                 <option value="">{{ __('Semua Kondisi') }}</option>
                                 @foreach($kondisis as $kondisi)
-                                    <option value="{{ $kondisi }}">{{ $kondisi }}</option>
+                                    <option value="{{ $kondisi }}" @selected(request('kondisi') == $kondisi)>{{ $kondisi }}</option>
                                 @endforeach
                             </select>
                         </div>
