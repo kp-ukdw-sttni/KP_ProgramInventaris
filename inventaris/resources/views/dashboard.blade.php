@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout :title="__('Dasbor')">
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Dasbor Inventaris Kampus STTNI') }}
@@ -158,7 +158,7 @@
 
             <!-- Quick Action Cards -->
             <h3 class="text-lg font-bold text-gray-700 mb-4">Akses Cepat Layanan</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                 <!-- Inventaris Card -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-150 p-6 hover:shadow-md transition-shadow flex flex-col justify-between">
                     <div>
@@ -184,6 +184,22 @@
                     <div class="mt-6">
                         <a href="{{ route('ruangan.index') }}" class="inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700 transition">
                             Buka Daftar Ruangan
+                            <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Kategori Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-150 p-6 hover:shadow-md transition-shadow flex flex-col justify-between">
+                    <div>
+                        <h4 class="text-md font-bold text-gray-800">Daftar Kategori</h4>
+                        <p class="text-sm text-gray-500 mt-2">Kelola klasifikasi barang seperti kursi, meja, AC, dan komputer agar inventaris lebih rapi.</p>
+                    </div>
+                    <div class="mt-6">
+                        <a href="{{ route('kategori.index') }}" class="inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700 transition">
+                            Buka Daftar Kategori
                             <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                             </svg>

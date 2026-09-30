@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout :title="__('Edit Ruangan')">
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Edit Ruangan / Unit Kerja STTNI') }}
