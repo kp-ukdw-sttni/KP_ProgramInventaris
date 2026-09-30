@@ -3,11 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\KategoriBarang;
+use App\Http\Controllers\Concerns\PreservesListState;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class KategoriController extends Controller
 {
+    use PreservesListState;
+
+    private const PER_PAGE = 15;
+
     /**
      * Display a listing of categories.
      */
@@ -27,7 +32,7 @@ class KategoriController extends Controller
         $kategoris = KategoriBarang::withCount('barangs')
             ->when($column === 'id', fn ($q) => $q->orderBy('id', $direction))
             ->when($column === 'nama_kategori', fn ($q) => $q->orderBy('nama_kategori', $direction))
-            ->paginate(15)
+            ->paginate(self::PER_PAGE)
             ->withQueryString();
 
         return view('kategori.index', compact('kategoris', 'column', 'direction'));
@@ -76,8 +81,9 @@ class KategoriController extends Controller
         ]);
 
         $kategori = KategoriBarang::create($validated);
+        $state = $this->listState($request, 'kategori');
 
-        return redirect()->route('kategori.index')
+        return redirect()->route('kategori.index', $state)
             ->with('success', 'Kategori "' . $kategori->nama_kategori . '" berhasil ditambahkan. Silakan kategorikan barang yang sudah ada.');
     }
 
@@ -113,13 +119,15 @@ class KategoriController extends Controller
             $pesan .= ' ' . $jumlahBarang . ' unit barang ikut mengikuti perubahan nama ini.';
         }
 
-        return redirect()->route('kategori.index')->with('success', $pesan);
+        $state = $this->listState($request, 'kategori');
+
+        return redirect()->route('kategori.index', $state)->with('success', $pesan);
     }
 
     /**
      * Remove the specified category.
      */
-    public function destroy(KategoriBarang $kategori)
+    public function destroy(Request $request, KategoriBarang $kategori)
     {
         $nama = $kategori->nama_kategori;
         $jumlahBarang = $kategori->barangs()->count();
@@ -132,6 +140,9 @@ class KategoriController extends Controller
             $pesan .= '. ' . $jumlahBarang . ' unit barang kini berstatus tanpa kategori dan tidak ikut terhapus';
         }
 
-        return redirect()->route('kategori.index')->with('success', $pesan . '.');
+        $sisa = KategoriBarang::withCount('barangs')->toBase()->getCountForPagination();
+        $state = $this->listState($request, 'kategori', $sisa, self::PER_PAGE);
+
+        return redirect()->route('kategori.index', $state)->with('success', $pesan . '.');
     }
 }

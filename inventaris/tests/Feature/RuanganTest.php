@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Concerns\AssertsListStateLinks;
 use App\Models\User;
 use App\Models\Ruangan;
 use App\Models\KategoriBarang;
@@ -11,7 +12,7 @@ use App\Models\Barang;
 
 class RuanganTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, AssertsListStateLinks;
 
     private User $user;
 
@@ -97,5 +98,75 @@ class RuanganTest extends TestCase
 
         $response->assertSee('Meja');
         $response->assertSee('2 barang');
+    }
+
+    /**
+     * Test the page query is preserved after store, update, and destroy.
+     */
+    public function test_page_query_is_preserved_after_crud(): void
+    {
+        // 20 ruangan supaya halaman 2 masih ada isinya (15 per halaman)
+        for ($i = 1; $i <= 20; $i++) {
+            Ruangan::create(['nama_ruangan' => 'Ruang ' . $i]);
+        }
+
+        $ruangan = Ruangan::where('nama_ruangan', 'Ruang 20')->firstOrFail();
+        $query = ['page' => 2];
+
+        $store = $this->actingAs($this->user)->post(route('ruangan.store', $query), [
+            'nama_ruangan' => 'Ruang Musik',
+            'deskripsi' => 'Latihan',
+        ]);
+        $store->assertRedirect(route('ruangan.index', $query));
+
+        $update = $this->actingAs($this->user)->put(route('ruangan.update', array_merge([$ruangan->id], $query)), [
+            'nama_ruangan' => 'Ruang Musik Utama',
+            'deskripsi' => null,
+        ]);
+        $update->assertRedirect(route('ruangan.index', $query));
+
+        $destroy = $this->actingAs($this->user)->delete(route('ruangan.destroy', array_merge([$ruangan->id], $query)));
+        $destroy->assertRedirect(route('ruangan.index', $query));
+    }
+
+    /**
+     * Test destroy clamps the page when the last row of the final page is removed.
+     */
+    public function test_destroy_clamps_page_when_last_row_is_deleted(): void
+    {
+        for ($i = 1; $i <= 16; $i++) {
+            Ruangan::create(['nama_ruangan' => 'Ruang ' . $i]);
+        }
+
+        // Baris ke-16 adalah satu-satunya isi halaman 2
+        $terakhir = Ruangan::where('nama_ruangan', 'Ruang 16')->firstOrFail();
+
+        $response = $this->actingAs($this->user)->delete(
+            route('ruangan.destroy', [$terakhir->id, 'page' => 2])
+        );
+
+        // 15 ruangan tersisa = 1 halaman, jadi kembali ke halaman 1
+        $response->assertRedirect(route('ruangan.index'));
+    }
+
+    /**
+     * Test the list view keeps the active page on its action links.
+     */
+    public function test_index_action_links_carry_the_active_page(): void
+    {
+        // 16 ruangan supaya halaman 2 benar-benar punya isi
+        for ($i = 1; $i <= 16; $i++) {
+            Ruangan::create(['nama_ruangan' => 'Ruang ' . $i]);
+        }
+
+        $ruangan = Ruangan::where('nama_ruangan', 'Ruang 16')->firstOrFail();
+
+        $response = $this->actingAs($this->user)->get(route('ruangan.index', ['page' => 2]));
+
+        $response->assertStatus(200);
+
+        $this->assertUrlCarries($response, route('ruangan.create'), ['page' => 2]);
+        $this->assertUrlCarries($response, route('ruangan.edit', $ruangan->id), ['page' => 2]);
+        $this->assertUrlCarries($response, route('ruangan.destroy', $ruangan->id), ['page' => 2]);
     }
 }

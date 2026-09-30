@@ -1,4 +1,8 @@
 <x-app-layout :title="__('Tambah Kategori')">
+    @php
+        $qs = request()->getQueryString() ? '?' . request()->getQueryString() : '';
+    @endphp
+
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Tambah Kategori Barang STTNI') }}
@@ -13,7 +17,7 @@
                     {{ __('Buat kategori baru untuk mengelompokkan sarana & prasarana, contoh: Kursi, Meja, AC, Komputer, dan sebagainya.') }}
                 </div>
 
-                <form method="POST" action="{{ route('kategori.store') }}" class="space-y-6">
+                <form method="POST" action="{{ route('kategori.store') }}{{ $qs }}" class="space-y-6">
                     @csrf
 
                     <!-- Nama Kategori -->
@@ -25,7 +29,7 @@
 
                     <!-- Action Buttons -->
                     <div class="flex items-center justify-end space-x-4 border-t border-gray-100 pt-4">
-                        <a href="{{ route('kategori.index') }}" class="text-sm text-gray-600 hover:text-gray-900 transition">
+                        <a href="{{ route('kategori.index') }}{{ $qs }}" class="text-sm text-gray-600 hover:text-gray-900 transition">
                             {{ __('Batal') }}
                         </a>
                         <x-primary-button>

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tests\Concerns\AssertsListStateLinks;
 use App\Models\User;
 use App\Models\Ruangan;
 use App\Models\KategoriBarang;
@@ -11,7 +12,7 @@ use App\Models\Barang;
 
 class BarangTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, AssertsListStateLinks;
 
     private User $user;
 
@@ -206,11 +207,112 @@ class BarangTest extends TestCase
             'kondisi' => 'Rusak',
         ]);
 
+        $response = $this->actingAs($this->user)->put(route('barang.update', $barang->id), [
+            'ruangan_id' => $ruangan->id,
+            'nama_fasilitas' => 'Speaker Aktif',
+            'kondisi' => 'Rusak',
+        ]);
+
         $response->assertRedirect(route('barang.index'));
         $response->assertSessionHas(
             'success',
             'Barang "Speaker Aktif" (INV-GEDUNGKAPEL-001) berhasil diperbarui.'
         );
+    }
+
+    /**
+     * Test preserving search filter across store, update, and destroy.
+     */
+    public function test_list_filters_are_preserved_after_crud(): void
+    {
+        $lab = Ruangan::create(['nama_ruangan' => 'Lab A']);
+        $lab2 = Ruangan::create(['nama_ruangan' => 'Lab B']);
+        $kat = KategoriBarang::create(['nama_kategori' => 'Elektronik']);
+
+        // Item that matches search
+        $matching = Barang::create([
+            'ruangan_id' => $lab->id,
+            'kategori_id' => $kat->id,
+            'nama_fasilitas' => 'Monitor XYZ',
+            'kode_inventaris' => 'INV-LABA-001',
+            'kondisi' => 'Baik',
+        ]);
+        Barang::create([
+            'ruangan_id' => $lab2->id,
+            'nama_fasilitas' => 'Kursi',
+            'kode_inventaris' => 'INV-LABB-001',
+            'kondisi' => 'Baik',
+        ]);
+
+        $query = [
+            'search' => 'Monitor',
+            'ruangan_id' => $lab->id,
+            'kategori_id' => $kat->id,
+            'kondisi' => 'Baik',
+            'page' => 1,
+        ];
+
+        // Store should redirect back with filters (and reset page)
+        $store = $this->actingAs($this->user)->post(route('barang.store', $query), [
+            'ruangan_ids' => [$lab->id],
+            'kategori_id' => $kat->id,
+            'nama_fasilitas' => 'Mouse',
+            'jumlah' => 1,
+            'kondisi' => 'Baik',
+        ]);
+        $store->assertRedirect(route('barang.index', array_merge($query, ['page' => null])));
+
+        // Update should preserve all filters (including page)
+        $update = $this->actingAs($this->user)->put(route('barang.update', array_merge([$matching->id], $query)), [
+            'ruangan_id' => $lab->id,
+            'kategori_id' => $kat->id,
+            'nama_fasilitas' => 'Monitor XYZ',
+            'kondisi' => 'Kurang Baik',
+        ]);
+        $update->assertRedirect(route('barang.index', $query));
+
+        // Destroy should preserve filters and clamp page if needed (kept same here)
+        $destroy = $this->actingAs($this->user)->delete(route('barang.destroy', array_merge([$matching->id], $query)));
+        $destroy->assertRedirect(route('barang.index', $query));
+    }
+
+    /**
+     * Test the list view keeps the active query string on its action links so
+     * filters survive the trip to the edit form and back.
+     */
+    public function test_index_action_links_carry_the_active_query_string(): void
+    {
+        $ruangan = Ruangan::create(['nama_ruangan' => 'Lab A']);
+
+        // 16 unit yang cocok supaya halaman 2 benar-benar punya isi
+        foreach (range(1, 16) as $i) {
+            Barang::create([
+                'ruangan_id' => $ruangan->id,
+                'nama_fasilitas' => 'Monitor '.$i,
+                'kode_inventaris' => 'INV-LABA-'.str_pad($i, 3, '0', STR_PAD_LEFT),
+                'kondisi' => 'Baik',
+            ]);
+        }
+
+        $barang = Barang::orderByDesc('id')->first();
+        $query = ['search' => 'Monitor', 'ruangan_id' => $ruangan->id, 'page' => 2];
+
+        $response = $this->actingAs($this->user)->get(route('barang.index', $query));
+
+        $response->assertStatus(200);
+
+        $params = [
+            'search' => 'Monitor',
+            'ruangan_id' => $ruangan->id,
+            'page' => 2,
+        ];
+
+        // Link "Tambah Barang" menuju form create sambil menjaga filter
+        $this->assertUrlCarries($response, route('barang.create'), $params);
+
+        // Link edit dan form hapus di dalam partial tabel ikut membawa filter
+        $this->assertUrlCarries($response, route('barang.edit', $barang->id), $params);
+        $this->assertUrlCarries($response, route('barang.destroy', $barang->id), $params);
     }
 
     /**

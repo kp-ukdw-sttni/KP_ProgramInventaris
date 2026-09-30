@@ -1,10 +1,14 @@
 <x-app-layout :title="__('Manajemen Inventaris')">
+    @php
+        $qs = request()->getQueryString() ? '?' . request()->getQueryString() : '';
+    @endphp
+
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Manajemen Sarana & Prasarana STTNI') }}
             </h2>
-            <a href="{{ route('barang.create') }}">
+            <a href="{{ route('barang.create') }}{{ $qs }}">
                 <x-primary-button>
                     {{ __('Tambah Barang') }}
                 </x-primary-button>

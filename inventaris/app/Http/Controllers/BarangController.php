@@ -3,17 +3,44 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\Concerns\PreservesListState;
 use App\Models\Barang;
 use App\Models\Ruangan;
 use App\Models\KategoriBarang;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rule;
 
 class BarangController extends Controller
 {
+    use PreservesListState;
+
+    private const PER_PAGE = 15;
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
+    {
+        // Paginate by 15 items per page and append query parameters to the links
+        $barangs = $this->filteredQuery($request)->paginate(self::PER_PAGE)->withQueryString();
+
+        // AJAX request returns only the partial table HTML
+        if ($request->ajax()) {
+            return view('barang.partials.table', compact('barangs'))->render();
+        }
+
+        // Normal request gets helper data for dropdown filters
+        $ruangans = Ruangan::all();
+        $kondisis = ['Baik', 'Kurang Baik', 'Rusak', 'Mati'];
+        $kategoris = KategoriBarang::all();
+
+        return view('barang.index', compact('barangs', 'ruangans', 'kondisis', 'kategoris'));
+    }
+
+    /**
+     * Bangun query daftar barang sesuai filter yang sedang aktif.
+     */
+    private function filteredQuery(Request $request): Builder
     {
         $query = Barang::with(['ruangan', 'kategoriBarang']);
 
@@ -41,20 +68,7 @@ class BarangController extends Controller
             $query->where('kondisi', $request->input('kondisi'));
         }
 
-        // Paginate by 15 items per page and append query parameters to the links
-        $barangs = $query->paginate(15)->withQueryString();
-
-        // AJAX request returns only the partial table HTML
-        if ($request->ajax()) {
-            return view('barang.partials.table', compact('barangs'))->render();
-        }
-
-        // Normal request gets helper data for dropdown filters
-        $ruangans = Ruangan::all();
-        $kondisis = ['Baik', 'Kurang Baik', 'Rusak', 'Mati'];
-        $kategoris = KategoriBarang::all();
-
-        return view('barang.index', compact('barangs', 'ruangans', 'kondisis', 'kategoris'));
+        return $query;
     }
 
     /**
@@ -141,7 +155,11 @@ class BarangController extends Controller
             $pesan .= ' di ' . count($detailRuang) . ' ruangan: ' . $daftar . '.';
         }
 
-        return redirect()->route('barang.index')->with('success', $pesan);
+        // Filter tetap dipertahankan, halaman dikembalikan ke awal supaya
+        // barang baru yang cocok dengan filter terlihat langsung.
+        $state = $this->listState($request, 'barang', keepPage: false);
+
+        return redirect()->route('barang.index', $state)->with('success', $pesan);
     }
 
     /**
@@ -187,13 +205,15 @@ class BarangController extends Controller
             }
         }
 
-        return redirect()->route('barang.index')->with('success', $pesan);
+        $state = $this->listState($request, 'barang');
+
+        return redirect()->route('barang.index', $state)->with('success', $pesan);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Barang $barang)
+    public function destroy(Request $request, Barang $barang)
     {
         $barang->loadMissing('ruangan');
 
@@ -209,7 +229,12 @@ class BarangController extends Controller
             $pesan .= ' dari ' . $namaRuangan;
         }
 
-        return redirect()->route('barang.index')->with('success', $pesan . '.');
+        // Hitung ulang sisa hasil filter supaya halaman tidak melompat ke
+        // halaman kosong setelah baris terakhir dihapus.
+        $sisa = $this->filteredQuery($request)->toBase()->getCountForPagination();
+        $state = $this->listState($request, 'barang', $sisa, self::PER_PAGE);
+
+        return redirect()->route('barang.index', $state)->with('success', $pesan . '.');
     }
 
     /**

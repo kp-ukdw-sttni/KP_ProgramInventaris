@@ -1,4 +1,8 @@
 <x-app-layout :title="__('Edit Ruangan')">
+    @php
+        $qs = request()->getQueryString() ? '?' . request()->getQueryString() : '';
+    @endphp
+
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Edit Ruangan / Unit Kerja STTNI') }}
@@ -13,7 +17,7 @@
                     {{ __('Perbarui informasi ruangan atau unit kerja STTNI. Perubahan ini akan segera memengaruhi tata letak inventaris barang.') }}
                 </div>
 
-                <form method="POST" action="{{ route('ruangan.update', $ruangan->id) }}" class="space-y-6">
+                <form method="POST" action="{{ route('ruangan.update', $ruangan->id) }}{{ $qs }}" class="space-y-6">
                     @csrf
                     @method('PUT')
 
@@ -33,7 +37,7 @@
 
                     <!-- Action Buttons -->
                     <div class="flex items-center justify-end space-x-4 border-t border-gray-100 pt-4">
-                        <a href="{{ route('ruangan.index') }}" class="text-sm text-gray-600 hover:text-gray-900 transition">
+                        <a href="{{ route('ruangan.index') }}{{ $qs }}" class="text-sm text-gray-600 hover:text-gray-900 transition">
                             {{ __('Batal') }}
                         </a>
                         <x-primary-button>

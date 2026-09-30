@@ -3,16 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ruangan;
+use App\Http\Controllers\Concerns\PreservesListState;
 use Illuminate\Http\Request;
 
 class RuanganController extends Controller
 {
+    use PreservesListState;
+
+    private const PER_PAGE = 15;
+
     /**
      * Display a listing of rooms.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $ruangans = Ruangan::withCount('barangs')->paginate(15);
+        $ruangans = Ruangan::withCount('barangs')->paginate(self::PER_PAGE)->withQueryString();
+
         return view('ruangan.index', compact('ruangans'));
     }
 
@@ -67,7 +73,9 @@ class RuanganController extends Controller
 
         $ruangan = Ruangan::create($validated);
 
-        return redirect()->route('ruangan.index')
+        $state = $this->listState($request, 'ruangan');
+
+        return redirect()->route('ruangan.index', $state)
             ->with('success', 'Ruangan "' . $ruangan->nama_ruangan . '" berhasil ditambahkan. Ruangan ini masih kosong, silakan tambahkan barang ke dalamnya.');
     }
 
@@ -104,13 +112,15 @@ class RuanganController extends Controller
             $pesan .= ' ' . $jumlahBarang . ' unit barang di dalamnya tetap berada di ruangan ini.';
         }
 
-        return redirect()->route('ruangan.index')->with('success', $pesan);
+        $state = $this->listState($request, 'ruangan');
+
+        return redirect()->route('ruangan.index', $state)->with('success', $pesan);
     }
 
     /**
      * Remove a room.
      */
-    public function destroy(Ruangan $ruangan)
+    public function destroy(Request $request, Ruangan $ruangan)
     {
         $nama = $ruangan->nama_ruangan;
         $jumlahBarang = $ruangan->barangs()->count();
@@ -123,6 +133,9 @@ class RuanganController extends Controller
             $pesan .= ' beserta ' . $jumlahBarang . ' unit barang di dalamnya';
         }
 
-        return redirect()->route('ruangan.index')->with('success', $pesan . '.');
+        $sisa = Ruangan::withCount('barangs')->toBase()->getCountForPagination();
+        $state = $this->listState($request, 'ruangan', $sisa, self::PER_PAGE);
+
+        return redirect()->route('ruangan.index', $state)->with('success', $pesan . '.');
     }
 }
