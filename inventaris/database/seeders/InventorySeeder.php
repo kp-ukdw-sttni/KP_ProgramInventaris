@@ -49,8 +49,8 @@ class InventorySeeder extends Seeder
         ];
 
         $createdRuangans = [];
-        foreach ($roomsByGroup as $room) {
-            $createdRuangans[$room['nama_ruangan']] = Ruangan::create($room);
+        foreach ($roomsByGroup as $index => $room) {
+            $createdRuangans[$room['nama_ruangan']] = Ruangan::create($room + ['urutan' => $index + 1]);
         }
 
         // 2. Seed Categories (Kategori Barang)

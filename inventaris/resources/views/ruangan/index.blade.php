@@ -26,6 +26,9 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                        Urutan
+                                    </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                         Klasifikasi Area
                                     </th>
@@ -46,6 +49,37 @@
                             <tbody class="bg-white divide-y divide-gray-100">
                                 @forelse($ruangans as $ruangan)
                                     <tr class="hover:bg-gray-50 transition-colors">
+                                        <!-- Reorder controls -->
+                                        <td class="px-3 py-4 whitespace-nowrap text-center align-middle">
+                                            @php
+                                                $bolehNaik = ! $loop->first;
+                                                $bolehTurun = ! $loop->last;
+                                            @endphp
+                                            <div class="inline-flex items-center gap-1">
+                                                <form action="{{ route('ruangan.move', $ruangan->id) }}{{ $qs }}" method="POST" class="inline">
+                                                    @csrf
+                                                    <input type="hidden" name="direction" value="up">
+                                                    <button type="submit" title="Naikkan urutan" aria-label="Naikkan urutan {{ $ruangan->nama_ruangan }}"
+                                                            @disabled(! $bolehNaik)
+                                                            class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-gray-200 bg-white text-gray-500 transition-colors hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 disabled:cursor-not-allowed disabled:border-gray-100 disabled:bg-gray-50 disabled:text-gray-300">
+                                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('ruangan.move', $ruangan->id) }}{{ $qs }}" method="POST" class="inline">
+                                                    @csrf
+                                                    <input type="hidden" name="direction" value="down">
+                                                    <button type="submit" title="Turunkan urutan" aria-label="Turunkan urutan {{ $ruangan->nama_ruangan }}"
+                                                            @disabled(! $bolehTurun)
+                                                            class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-gray-200 bg-white text-gray-500 transition-colors hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 disabled:cursor-not-allowed disabled:border-gray-100 disabled:bg-gray-50 disabled:text-gray-300">
+                                                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
                                         <!-- Dynamic Area Classification Badges -->
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                                             @php
@@ -101,7 +135,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="px-6 py-10 text-center text-sm text-gray-500">
+                                        <td colspan="6" class="px-6 py-10 text-center text-sm text-gray-500">
                                             Tidak ada ruangan terdaftar.
                                         </td>
                                     </tr>

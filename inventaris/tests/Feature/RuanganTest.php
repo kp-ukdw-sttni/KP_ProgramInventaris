@@ -150,6 +150,114 @@ class RuanganTest extends TestCase
     }
 
     /**
+     * Test index sorts rooms by the urutan column, not by insertion order.
+     */
+    public function test_index_sorts_rooms_by_urutan_column(): void
+    {
+        Ruangan::create(['nama_ruangan' => 'Ruang Kelas B', 'urutan' => 2]);
+        Ruangan::create(['nama_ruangan' => 'Ruang Kelas A', 'urutan' => 1]);
+
+        $html = $this->actingAs($this->user)->get(route('ruangan.index'))->getContent();
+
+        $this->assertTrue(
+            strpos($html, 'Ruang Kelas A') < strpos($html, 'Ruang Kelas B'),
+            'Ruang Kelas A harus tampil sebelum Ruang Kelas B.'
+        );
+    }
+
+    /**
+     * Test a new room is appended to the end of the list.
+     */
+    public function test_new_room_is_appended_to_the_end(): void
+    {
+        $pertama = Ruangan::create(['nama_ruangan' => 'Ruang Kelas A']);
+        $terakhir = Ruangan::create(['nama_ruangan' => 'Ruang Tamu']);
+
+        $this->assertSame(1, $pertama->urutan);
+        $this->assertSame(2, $terakhir->urutan);
+    }
+
+    /**
+     * Test move swaps the room with its neighbour on the same page.
+     */
+    public function test_move_swaps_room_with_its_neighbour(): void
+    {
+        $a = Ruangan::create(['nama_ruangan' => 'Ruang A']);
+        $b = Ruangan::create(['nama_ruangan' => 'Ruang B']);
+        $c = Ruangan::create(['nama_ruangan' => 'Ruang C']);
+
+        $naik = $this->actingAs($this->user)->post(route('ruangan.move', $c->id), ['direction' => 'up']);
+        $naik->assertRedirect(route('ruangan.index'));
+        $naik->assertSessionHas('success');
+
+        $turun = $this->actingAs($this->user)->post(route('ruangan.move', $a->fresh()->id), ['direction' => 'down']);
+        $turun->assertRedirect(route('ruangan.index'));
+
+        $this->assertSame(
+            ['Ruang C', 'Ruang A', 'Ruang B'],
+            Ruangan::orderBy('urutan')->pluck('nama_ruangan')->all()
+        );
+        $this->assertSame([1, 2, 3], Ruangan::orderBy('urutan')->pluck('urutan')->all());
+        $this->assertSame($c->id, Ruangan::orderBy('urutan')->first()->id);
+    }
+
+    /**
+     * Test move is rejected at the top and bottom edge of the page.
+     */
+    public function test_move_is_rejected_at_page_boundary(): void
+    {
+        $a = Ruangan::create(['nama_ruangan' => 'Ruang A']);
+        $b = Ruangan::create(['nama_ruangan' => 'Ruang B']);
+
+        $atas = $this->actingAs($this->user)->post(route('ruangan.move', $a->id), ['direction' => 'up']);
+        $atas->assertRedirect(route('ruangan.index'));
+        $atas->assertSessionHas('error');
+
+        $bawah = $this->actingAs($this->user)->post(route('ruangan.move', $b->id), ['direction' => 'down']);
+        $bawah->assertRedirect(route('ruangan.index'));
+        $bawah->assertSessionHas('error');
+
+        $this->assertSame(1, $a->fresh()->urutan);
+        $this->assertSame(2, $b->fresh()->urutan);
+    }
+
+    /**
+     * Test move keeps the active page and rejects an unknown direction.
+     */
+    public function test_move_preserves_page_and_validates_direction(): void
+    {
+        for ($i = 1; $i <= 20; $i++) {
+            Ruangan::create(['nama_ruangan' => 'Ruang ' . $i]);
+        }
+
+        $ruangan = Ruangan::where('nama_ruangan', 'Ruang 17')->firstOrFail();
+        $query = ['page' => 2];
+
+        $response = $this->actingAs($this->user)->post(
+            route('ruangan.move', array_merge([$ruangan->id], $query)),
+            ['direction' => 'down']
+        );
+        $response->assertRedirect(route('ruangan.index', $query));
+
+        $invalid = $this->actingAs($this->user)->post(
+            route('ruangan.move', array_merge([$ruangan->id], $query)),
+            ['direction' => 'sideways']
+        );
+        $invalid->assertSessionHasErrors('direction');
+    }
+
+    /**
+     * Test guest user cannot reorder rooms.
+     */
+    public function test_move_requires_authentication(): void
+    {
+        $ruangan = Ruangan::create(['nama_ruangan' => 'Ruang A']);
+
+        $this->post(route('ruangan.move', $ruangan->id), ['direction' => 'up'])
+            ->assertRedirect('/login');
+    }
+
+    /**
      * Test the list view keeps the active page on its action links.
      */
     public function test_index_action_links_carry_the_active_page(): void
@@ -168,5 +276,6 @@ class RuanganTest extends TestCase
         $this->assertUrlCarries($response, route('ruangan.create'), ['page' => 2]);
         $this->assertUrlCarries($response, route('ruangan.edit', $ruangan->id), ['page' => 2]);
         $this->assertUrlCarries($response, route('ruangan.destroy', $ruangan->id), ['page' => 2]);
+        $this->assertUrlCarries($response, route('ruangan.move', $ruangan->id), ['page' => 2]);
     }
 }

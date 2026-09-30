@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Ruangan;
 use App\Http\Controllers\Concerns\PreservesListState;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RuanganController extends Controller
 {
@@ -17,7 +18,11 @@ class RuanganController extends Controller
      */
     public function index(Request $request)
     {
-        $ruangans = Ruangan::withCount('barangs')->paginate(self::PER_PAGE)->withQueryString();
+        $ruangans = Ruangan::withCount('barangs')
+            ->orderBy('urutan')
+            ->orderBy('nama_ruangan')
+            ->paginate(self::PER_PAGE)
+            ->withQueryString();
 
         return view('ruangan.index', compact('ruangans'));
     }
@@ -51,6 +56,46 @@ class RuanganController extends Controller
     private static function baseNamaFasilitas(string $nama): string
     {
         return preg_replace('/\s+\d+\z/', '', $nama) ?: $nama;
+    }
+
+    /**
+     * Geser satu ruangan naik atau turun satu posisi.
+     */
+    public function move(Request $request, Ruangan $ruangan)
+    {
+        $validated = $request->validate([
+            'direction' => ['required', 'in:up,down'],
+        ]);
+
+        $arah = $validated['direction'];
+
+        $ids = Ruangan::orderBy('urutan')
+            ->orderBy('nama_ruangan')
+            ->orderBy('id')
+            ->pluck('id')
+            ->all();
+
+        $posisi = array_search($ruangan->id, $ids, true);
+        $posisiBaru = $arah === 'up' ? $posisi - 1 : $posisi + 1;
+
+        if ($posisi === false || $posisiBaru < 0 || $posisiBaru >= count($ids)) {
+            return redirect()->route('ruangan.index', $this->listState($request, 'ruangan'))
+                ->with('error', '"' . $ruangan->nama_ruangan . '" sudah berada di posisi ' . ($arah === 'up' ? 'teratas' : 'terbawah') . '.');
+        }
+
+        array_splice($ids, $posisi, 1);
+        array_splice($ids, $posisiBaru, 0, $ruangan->id);
+
+        // Nomor urut ditulis ulang rapat supaya tidak pernah ada selisih atau
+        // nilai kembar, tanpa harus worry kalau urutan sudah pernah diubah.
+        DB::transaction(function () use ($ids) {
+            foreach ($ids as $index => $id) {
+                Ruangan::whereKey($id)->update(['urutan' => $index + 1]);
+            }
+        });
+
+        return redirect()->route('ruangan.index', $this->listState($request, 'ruangan'))
+            ->with('success', 'Urutan "' . $ruangan->nama_ruangan . '" berhasil ' . ($arah === 'up' ? 'dinaikkan' : 'diturunkan') . '.');
     }
 
     /**

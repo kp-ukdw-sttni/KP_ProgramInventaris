@@ -30,7 +30,7 @@ class BarangController extends Controller
         }
 
         // Normal request gets helper data for dropdown filters
-        $ruangans = Ruangan::all();
+        $ruangans = Ruangan::orderBy('urutan')->orderBy('nama_ruangan')->get();
         $kondisis = ['Baik', 'Kurang Baik', 'Rusak', 'Mati'];
         $kategoris = KategoriBarang::all();
 
@@ -76,7 +76,7 @@ class BarangController extends Controller
      */
     public function create()
     {
-        $ruangans = Ruangan::all();
+        $ruangans = Ruangan::orderBy('urutan')->orderBy('nama_ruangan')->get();
         $kategoris = KategoriBarang::all();
         $kondisis = ['Baik', 'Kurang Baik', 'Rusak', 'Mati'];
 
@@ -167,7 +167,7 @@ class BarangController extends Controller
      */
     public function edit(Barang $barang)
     {
-        $ruangans = Ruangan::all();
+        $ruangans = Ruangan::orderBy('urutan')->orderBy('nama_ruangan')->get();
         $kategoris = KategoriBarang::all();
         $kondisis = ['Baik', 'Kurang Baik', 'Rusak', 'Mati'];
 

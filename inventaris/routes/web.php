@@ -25,6 +25,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('barang', BarangController::class);
     Route::resource('ruangan', RuanganController::class);
     Route::resource('kategori', KategoriController::class);
+
+    Route::post('/ruangan/{ruangan}/move', [RuanganController::class, 'move'])
+        ->name('ruangan.move');
 });
 
 require __DIR__.'/auth.php';
