@@ -105,7 +105,7 @@ class BarangTest extends TestCase
         $kategori = KategoriBarang::create(['nama_kategori' => 'Elektronik']);
 
         $response = $this->actingAs($this->user)->post(route('barang.store'), [
-            'ruangan_id' => $ruangan->id,
+            'ruangan_ids' => [$ruangan->id],
             'kategori_id' => $kategori->id,
             'nama_fasilitas' => 'PC Client',
             'jumlah' => 3,
@@ -114,12 +114,16 @@ class BarangTest extends TestCase
         ]);
 
         $response->assertRedirect(route('barang.index'));
+        $response->assertSessionHas(
+            'success',
+            '3 unit PC Client berhasil ditambahkan di Laboratorium Komputer (kode INV-LABORATORIUMKOMPUTER-001 s.d. INV-LABORATORIUMKOMPUTER-003).'
+        );
         $this->assertDatabaseCount('barang', 3);
 
         $barangs = Barang::orderBy('kode_inventaris')->get();
 
         $this->assertEquals(
-            ['INV-LABORATORIUM-001', 'INV-LABORATORIUM-002', 'INV-LABORATORIUM-003'],
+            ['INV-LABORATORIUMKOMPUTER-001', 'INV-LABORATORIUMKOMPUTER-002', 'INV-LABORATORIUMKOMPUTER-003'],
             $barangs->pluck('kode_inventaris')->all()
         );
         $this->assertEquals(
@@ -135,17 +139,126 @@ class BarangTest extends TestCase
     {
         $ruangan = Ruangan::create(['nama_ruangan' => 'Ruang Ketua']);
 
-        $this->actingAs($this->user)->post(route('barang.store'), [
-            'ruangan_id' => $ruangan->id,
+        $response = $this->actingAs($this->user)->post(route('barang.store'), [
+            'ruangan_ids' => [$ruangan->id],
             'nama_fasilitas' => 'Meja Kerja Eksekutif',
             'jumlah' => 1,
             'kondisi' => 'Baik',
         ]);
 
+        $response->assertSessionHas(
+            'success',
+            '1 unit Meja Kerja Eksekutif berhasil ditambahkan di Ruang Ketua (kode INV-RUANGKETUA-001).'
+        );
+
         $this->assertDatabaseHas('barang', [
             'nama_fasilitas' => 'Meja Kerja Eksekutif',
             'kode_inventaris' => 'INV-RUANGKETUA-001',
         ]);
+    }
+
+    /**
+     * Test storing into several rooms at once spreads the units and reports
+     * the per-room breakdown in the flash notification.
+     */
+    public function test_store_across_multiple_rooms_creates_one_record_per_unit(): void
+    {
+        $lab = Ruangan::create(['nama_ruangan' => 'Lab A']);
+        $kantor = Ruangan::create(['nama_ruangan' => 'Ruang Bendahara']);
+
+        $response = $this->actingAs($this->user)->post(route('barang.store'), [
+            'ruangan_ids' => [$lab->id, $kantor->id],
+            'nama_fasilitas' => 'Kursi Lipat',
+            'jumlah' => 2,
+            'kondisi' => 'Baik',
+        ]);
+
+        $response->assertSessionHas(
+            'success',
+            '4 unit Kursi Lipat berhasil ditambahkan di 2 ruangan: Lab A (2 unit), Ruang Bendahara (2 unit).'
+        );
+
+        $this->assertDatabaseCount('barang', 4);
+        $this->assertSame(2, Barang::where('ruangan_id', $lab->id)->count());
+        $this->assertSame(2, Barang::where('ruangan_id', $kantor->id)->count());
+        $this->assertEquals(
+            ['INV-LABA-001', 'INV-LABA-002', 'INV-RUANGBENDAHARA-001', 'INV-RUANGBENDAHARA-002'],
+            Barang::orderBy('id')->pluck('kode_inventaris')->all()
+        );
+    }
+
+    /**
+     * Test updating a flash notification names the item and its inventory code.
+     */
+    public function test_update_reports_item_name_and_kode_in_flash(): void
+    {
+        $ruangan = Ruangan::create(['nama_ruangan' => 'Gedung Kapel']);
+        $barang = Barang::create([
+            'ruangan_id' => $ruangan->id,
+            'nama_fasilitas' => 'Speaker',
+            'kode_inventaris' => 'INV-GEDUNGKAPEL-001',
+            'kondisi' => 'Baik',
+        ]);
+
+        $response = $this->actingAs($this->user)->put(route('barang.update', $barang->id), [
+            'ruangan_id' => $ruangan->id,
+            'nama_fasilitas' => 'Speaker Aktif',
+            'kondisi' => 'Rusak',
+        ]);
+
+        $response->assertRedirect(route('barang.index'));
+        $response->assertSessionHas(
+            'success',
+            'Barang "Speaker Aktif" (INV-GEDUNGKAPEL-001) berhasil diperbarui.'
+        );
+    }
+
+    /**
+     * Test the destroy flash notification names the room the item came from.
+     */
+    public function test_destroy_reports_room_in_flash(): void
+    {
+        $ruangan = Ruangan::create(['nama_ruangan' => 'Gudang']);
+        $barang = Barang::create([
+            'ruangan_id' => $ruangan->id,
+            'nama_fasilitas' => 'Gerobak Sorong',
+            'kode_inventaris' => 'INV-GUDANG-001',
+            'kondisi' => 'Baik',
+        ]);
+
+        $response = $this->actingAs($this->user)->delete(route('barang.destroy', $barang->id));
+
+        $response->assertSessionHas(
+            'success',
+            '1 unit barang "Gerobak Sorong" (INV-GUDANG-001) berhasil dihapus dari Gudang.'
+        );
+        $this->assertDatabaseCount('barang', 0);
+    }
+
+    /**
+     * Test the flash message is rendered as a toast inside the page layout.
+     */
+    public function test_flash_message_renders_as_a_toast_notification(): void
+    {
+        $ruangan = Ruangan::create(['nama_ruangan' => 'Pos Keamanan']);
+
+        $response = $this->actingAs($this->user)->post(route('barang.store'), [
+            'ruangan_ids' => [$ruangan->id],
+            'nama_fasilitas' => 'CCTV',
+            'jumlah' => 1,
+            'kondisi' => 'Baik',
+        ]);
+
+        $response->assertRedirect(route('barang.index'));
+        $response->assertSessionHas('success');
+
+        session()->flash('success', '1 unit CCTV berhasil ditambahkan di Pos Keamanan.');
+
+        $this->actingAs($this->user)
+            ->get(route('barang.index'))
+            ->assertStatus(200)
+            ->assertSee('toast-progress', false)
+            ->assertSee('1 unit CCTV berhasil ditambahkan di Pos Keamanan.');
     }
 
     /**

@@ -33,6 +33,9 @@
                 </header>
             @endisset
 
+            <!-- Flash Notification Toast -->
+            <x-notification />
+
             <!-- Page Content -->
             <main>
                 {{ $slot }}

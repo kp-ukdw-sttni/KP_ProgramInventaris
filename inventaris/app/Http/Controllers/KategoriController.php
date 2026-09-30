@@ -75,9 +75,10 @@ class KategoriController extends Controller
             'nama_kategori' => ['required', 'string', 'max:255', Rule::unique('kategori_barang', 'nama_kategori')],
         ]);
 
-        KategoriBarang::create($validated);
+        $kategori = KategoriBarang::create($validated);
 
-        return redirect()->route('kategori.index')->with('success', 'Kategori berhasil ditambahkan!');
+        return redirect()->route('kategori.index')
+            ->with('success', 'Kategori "' . $kategori->nama_kategori . '" berhasil ditambahkan. Silakan kategorikan barang yang sudah ada.');
     }
 
     /**
@@ -97,9 +98,22 @@ class KategoriController extends Controller
             'nama_kategori' => ['required', 'string', 'max:255', Rule::unique('kategori_barang', 'nama_kategori')->ignore($kategori->id)],
         ]);
 
+        $namaSebelumnya = $kategori->nama_kategori;
+        $jumlahBarang = $kategori->barangs()->count();
+
         $kategori->update($validated);
 
-        return redirect()->route('kategori.index')->with('success', 'Kategori berhasil diperbarui!');
+        $pesan = 'Kategori "' . $kategori->nama_kategori . '" berhasil diperbarui.';
+
+        if ($namaSebelumnya !== $kategori->nama_kategori) {
+            $pesan .= ' Nama lama: "' . $namaSebelumnya . '".';
+        }
+
+        if ($jumlahBarang > 0) {
+            $pesan .= ' ' . $jumlahBarang . ' unit barang ikut mengikuti perubahan nama ini.';
+        }
+
+        return redirect()->route('kategori.index')->with('success', $pesan);
     }
 
     /**
@@ -107,8 +121,17 @@ class KategoriController extends Controller
      */
     public function destroy(KategoriBarang $kategori)
     {
+        $nama = $kategori->nama_kategori;
+        $jumlahBarang = $kategori->barangs()->count();
+
         $kategori->delete();
 
-        return redirect()->route('kategori.index')->with('success', 'Kategori berhasil dihapus!');
+        $pesan = 'Kategori "' . $nama . '" berhasil dihapus';
+
+        if ($jumlahBarang > 0) {
+            $pesan .= '. ' . $jumlahBarang . ' unit barang kini berstatus tanpa kategori dan tidak ikut terhapus';
+        }
+
+        return redirect()->route('kategori.index')->with('success', $pesan . '.');
     }
 }

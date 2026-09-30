@@ -1,3 +1,25 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    [x-cloak] {
+        display: none !important;
+    }
+}
+
+@keyframes toast-progress {
+    from {
+        transform: scaleX(1);
+    }
+
+    to {
+        transform: scaleX(0);
+    }
+}
+
+.toast-progress {
+    animation-name: toast-progress;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+}

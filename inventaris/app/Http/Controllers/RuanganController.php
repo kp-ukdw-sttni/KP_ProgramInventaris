@@ -65,9 +65,10 @@ class RuanganController extends Controller
             'deskripsi' => ['nullable', 'string'],
         ]);
 
-        Ruangan::create($validated);
+        $ruangan = Ruangan::create($validated);
 
-        return redirect()->route('ruangan.index')->with('success', 'Ruangan berhasil ditambahkan!');
+        return redirect()->route('ruangan.index')
+            ->with('success', 'Ruangan "' . $ruangan->nama_ruangan . '" berhasil ditambahkan. Ruangan ini masih kosong, silakan tambahkan barang ke dalamnya.');
     }
 
     /**
@@ -88,9 +89,22 @@ class RuanganController extends Controller
             'deskripsi' => ['nullable', 'string'],
         ]);
 
+        $jumlahBarang = $ruangan->barangs()->count();
+        $namaSebelumnya = $ruangan->nama_ruangan;
+
         $ruangan->update($validated);
 
-        return redirect()->route('ruangan.index')->with('success', 'Ruangan berhasil diperbarui!');
+        $pesan = 'Ruangan "' . $ruangan->nama_ruangan . '" berhasil diperbarui.';
+
+        if ($namaSebelumnya !== $ruangan->nama_ruangan) {
+            $pesan .= ' Nama lama: "' . $namaSebelumnya . '".';
+        }
+
+        if ($jumlahBarang > 0) {
+            $pesan .= ' ' . $jumlahBarang . ' unit barang di dalamnya tetap berada di ruangan ini.';
+        }
+
+        return redirect()->route('ruangan.index')->with('success', $pesan);
     }
 
     /**
@@ -98,8 +112,17 @@ class RuanganController extends Controller
      */
     public function destroy(Ruangan $ruangan)
     {
+        $nama = $ruangan->nama_ruangan;
+        $jumlahBarang = $ruangan->barangs()->count();
+
         $ruangan->delete();
 
-        return redirect()->route('ruangan.index')->with('success', 'Ruangan berhasil dihapus!');
+        $pesan = 'Ruangan "' . $nama . '" berhasil dihapus';
+
+        if ($jumlahBarang > 0) {
+            $pesan .= ' beserta ' . $jumlahBarang . ' unit barang di dalamnya';
+        }
+
+        return redirect()->route('ruangan.index')->with('success', $pesan . '.');
     }
 }
