@@ -5,12 +5,24 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 
-class ProfileController extends Controller
+class ProfileController extends Controller implements HasMiddleware
 {
+    /**
+     * Middleware yang membatasi aksi tulis profil (Viewer read-only).
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:manage profil', only: ['update', 'destroy']),
+        ];
+    }
+
     /**
      * Display the user's profile form.
      */

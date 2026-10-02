@@ -40,7 +40,7 @@ sesuai dengan fitur yang sudah dibangun.
   `php artisan key:generate`
 - `public/images/logo-sttni.png` (header Word + favicon)
 - `public/build/` (hasil kompilasi Vite, agar tidak perlu Node.js)
-- `database/database.sqlite` **sudah terisi** (data inventaris + akun admin1/admin2)
+- `database/database.sqlite` **sudah terisi** (data inventaris + akun admin, staf, guest)
 - `composer.json` dan `composer.lock` (untuk `composer install`)
 - `daftar inventaris sttni - (baru).docx` (sumber perintah `inventory:import-word`)
 
@@ -95,7 +95,7 @@ Catatan:
 ## 4. Langkah Instalasi
 
 > **Penting:** paket ini **sudah menyertakan** `database/database.sqlite` yang terisi
-> (data inventaris + akun admin1/admin2). **JANGAN** menjalankan
+> (data inventaris + akun admin, staf, dan guest). **JANGAN** menjalankan
 > `php artisan migrate:fresh --seed` atau `php artisan migrate --seed` — akan
 > menghapus/menggandakan data yang ada.
 
@@ -130,7 +130,7 @@ Catatan:
 - Jika memakai SQLite (default), `database/database.sqlite` sudah ada — **jangan**
   membuat/mengosongkannya.
 - Hanya bila memakai paket **tanpa** `database.sqlite` (mulai dari nol), barulah
-  jalankan `php artisan migrate --seed` untuk membuat tabel + akun admin1/admin2.
+  jalankan `php artisan migrate --seed` untuk membuat tabel + akun admin, staf, dan guest.
 
 ---
 
@@ -138,8 +138,9 @@ Catatan:
 
 | Email | Password | Nama & Role |
 | --- | --- | --- |
-| `admin1@sarpras.com` | `password` | Admin 1 Sarpras |
-| `admin2@sarpras.com` | `password` | Admin 2 Sarpras |
+| `admin@sarpras.com` | `password` | Admin Sarpras (akses penuh: tambah, edit, update, hapus semua fitur, import mode replace, kelola profil) |
+| `staf@sarpras.com` | `password` | Staf Sarpras (tambah, edit, import mode skip & export barang, kelola profil sendiri; fitur lain lihat saja) |
+| `guest@sarpras.com` | `password` | Viewer (hanya lihat semua data; tanpa import/export, ubah profil, & aksi tulis) |
 
 > Akun di atas **sudah ada** di `database/database.sqlite` yang disertakan
 > (tidak perlu menjalankan seeder).
@@ -159,8 +160,10 @@ Catatan:
 
 ## 7. Checklist Uji Setelah Instalasi
 
-- [ ] Login dengan kedua akun default
-- [ ] CRUD Barang, Ruangan, dan Kategori
+- [ ] Login dengan ketiga akun default (admin, staf, guest) dan pastikan hak akses sesuai role
+- [ ] CRUD Barang, Ruangan, dan Kategori (akun Admin Sarpras)
+- [ ] Staf Sarpras: bisa tambah/edit/import (skip) barang, aksi hapus / kelola ruangan & kategori ditolak (403)
+- [ ] Viewer: hanya bisa melihat; import, export, ubah profil, & aksi tulis ditolak (403)
 - [ ] Export CSV lalu buka di Excel (pemisah `;` + BOM sudah otomatis)
 - [ ] Export Word, cek logo STTNI + teks "INVENTARIS STTNI" + tabel tampil benar
 - [ ] Unduh template impor, isi, lalu impor (mode **skip** dan **replace**)

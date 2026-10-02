@@ -8,11 +8,13 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Daftar Kategori Barang STTNI') }}
             </h2>
-            <a href="{{ route('kategori.create') }}{{ $qs }}">
-                <x-primary-button>
-                    {{ __('Tambah Kategori') }}
-                </x-primary-button>
-            </a>
+            @can('manage kategori')
+                <a href="{{ route('kategori.create') }}{{ $qs }}">
+                    <x-primary-button>
+                        {{ __('Tambah Kategori') }}
+                    </x-primary-button>
+                </a>
+            @endcan
         </div>
     </x-slot>
 
@@ -80,6 +82,7 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
                                             <div class="inline-flex items-center space-x-2">
+                                                @can('manage kategori')
                                                 <a href="{{ route('kategori.edit', $kategori->id) }}{{ $qs }}" class="inline-flex items-center text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded-md transition-colors">
                                                     Edit
                                                 </a>
@@ -90,6 +93,7 @@
                                                         Hapus
                                                     </button>
                                                 </form>
+                                                @endcan
                                             </div>
                                         </td>
                                     </tr>

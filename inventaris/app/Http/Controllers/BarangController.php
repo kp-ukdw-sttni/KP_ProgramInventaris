@@ -9,17 +9,33 @@ use App\Models\Ruangan;
 use App\Support\DocxTable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class BarangController extends Controller
+class BarangController extends Controller implements HasMiddleware
 {
     use PreservesListState;
 
     private const PER_PAGE = 15;
+
+    /**
+     * Batasi aksi tulis sesuai permission yang dimiliki user.
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:create barang', only: ['create', 'store']),
+            new Middleware('permission:edit barang', only: ['edit', 'update']),
+            new Middleware('permission:delete barang', only: ['destroy']),
+            new Middleware('permission:import barang', only: ['import', 'importForm', 'importTemplate']),
+            new Middleware('permission:export barang', only: ['export']),
+        ];
+    }
 
     /**
      * Display a listing of the resource.
@@ -434,6 +450,13 @@ class BarangController extends Controller
 
         $importMode = $request->input('import_mode', 'skip');
         $file = $request->file('file');
+
+        // Mode replace menimpa data ber-kode sama, jadi dibatasi untuk
+        // pemegang permission 'replace barang' (Admin Sarpras).
+        if ($importMode === 'replace' && ! $request->user()->can('replace barang')) {
+            return redirect()->route('barang.import.form')
+                ->with('error', 'Mode "Ganti (Replace)" hanya dapat digunakan oleh Admin Sarpras. Silakan gunakan mode "Lewati (Skip)".');
+        }
 
         [$rows, $header] = $this->parseCsv($file->getRealPath());
 

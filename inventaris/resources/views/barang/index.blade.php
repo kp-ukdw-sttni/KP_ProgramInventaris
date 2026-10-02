@@ -8,11 +8,13 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Manajemen Sarana & Prasarana STTNI') }}
             </h2>
-            <a href="{{ route('barang.create') }}{{ $qs }}">
-                <x-primary-button>
-                    {{ __('Tambah Barang') }}
-                </x-primary-button>
-            </a>
+            @can('create barang')
+                <a href="{{ route('barang.create') }}{{ $qs }}">
+                    <x-primary-button>
+                        {{ __('Tambah Barang') }}
+                    </x-primary-button>
+                </a>
+            @endcan
         </div>
     </x-slot>
 
@@ -96,12 +98,15 @@
                             </select>
                         </div>
                         <div class="md:col-span-6 flex flex-wrap items-end justify-end gap-2">
-                            <a href="{{ route('barang.import.form') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                </svg>
-                                {{ __('Import') }}
-                            </a>
+                            @can('import barang')
+                                <a href="{{ route('barang.import.form') }}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    {{ __('Import') }}
+                                </a>
+                            @endcan
+                            @can('export barang')
                             <a href="{{ route('barang.export', ['format' => 'csv']) }}" class="inline-flex items-center px-4 py-2 bg-emerald-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -114,6 +119,7 @@
                                 </svg>
                                 {{ __('Export Word') }}
                             </a>
+                            @endcan
                         </div>
                     </div>
 

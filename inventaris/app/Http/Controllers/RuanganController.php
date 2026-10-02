@@ -5,13 +5,27 @@ namespace App\Http\Controllers;
 use App\Models\Ruangan;
 use App\Http\Controllers\Concerns\PreservesListState;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 
-class RuanganController extends Controller
+class RuanganController extends Controller implements HasMiddleware
 {
     use PreservesListState;
 
     private const PER_PAGE = 15;
+
+    /**
+     * Hanya user dengan permission manage ruangan yang boleh mengubah data.
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:manage ruangan', only: [
+                'create', 'store', 'edit', 'update', 'destroy', 'move',
+            ]),
+        ];
+    }
 
     /**
      * Display a listing of rooms.

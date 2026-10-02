@@ -137,7 +137,9 @@
                                 <x-input-label for="import_mode" :value="__('Mode Import')" />
                                 <select id="import_mode" name="import_mode" class="mt-1 block w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm text-sm">
                                     <option value="skip">{{ __('Lewati (Skip) jika data sudah ada') }}</option>
-                                    <option value="replace">{{ __('Ganti (Replace) data yang sudah ada') }}</option>
+                                    @can('replace barang')
+                                        <option value="replace">{{ __('Ganti (Replace) data yang sudah ada') }}</option>
+                                    @endcan
                                 </select>
                                 <p class="mt-1 text-xs text-gray-500">{{ __('Skip: data dengan kode inventaris yang sama akan dilewati. Replace: data dengan kode inventaris yang sama akan diperbarui, data baru tetap ditambahkan.') }}</p>
                                 <x-input-error :messages="$errors->get('import_mode')" class="mt-2" />

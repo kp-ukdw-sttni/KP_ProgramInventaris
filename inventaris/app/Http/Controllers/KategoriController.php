@@ -5,13 +5,27 @@ namespace App\Http\Controllers;
 use App\Models\KategoriBarang;
 use App\Http\Controllers\Concerns\PreservesListState;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Validation\Rule;
 
-class KategoriController extends Controller
+class KategoriController extends Controller implements HasMiddleware
 {
     use PreservesListState;
 
     private const PER_PAGE = 15;
+
+    /**
+     * Hanya user dengan permission manage kategori yang boleh mengubah data.
+     */
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('permission:manage kategori', only: [
+                'create', 'store', 'edit', 'update', 'destroy',
+            ]),
+        ];
+    }
 
     /**
      * Display a listing of categories.

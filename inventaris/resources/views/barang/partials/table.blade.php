@@ -53,16 +53,20 @@
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
             <div class="inline-flex items-center space-x-2">
-                <a href="{{ route('barang.edit', $barang->id) }}{{ $qs }}" class="inline-flex items-center text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded-md transition-colors">
-                    Edit
-                </a>
-                <form action="{{ route('barang.destroy', $barang->id) }}{{ $qs }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus barang ini?');" class="inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="inline-flex items-center text-rose-600 hover:text-rose-900 bg-rose-50 hover:bg-rose-100 px-2 py-1 rounded-md transition-colors">
-                        Hapus
-                    </button>
-                </form>
+                @can('edit barang')
+                    <a href="{{ route('barang.edit', $barang->id) }}{{ $qs }}" class="inline-flex items-center text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded-md transition-colors">
+                        Edit
+                    </a>
+                @endcan
+                @can('delete barang')
+                    <form action="{{ route('barang.destroy', $barang->id) }}{{ $qs }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus barang ini?');" class="inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="inline-flex items-center text-rose-600 hover:text-rose-900 bg-rose-50 hover:bg-rose-100 px-2 py-1 rounded-md transition-colors">
+                            Hapus
+                        </button>
+                    </form>
+                @endcan
             </div>
         </td>
     </tr>
