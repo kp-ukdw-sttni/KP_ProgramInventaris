@@ -22,6 +22,13 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Route custom barang harus didaftarkan sebelum resource agar
+    // /barang/export dan /barang/import tidak dianggap sebagai {barang}.
+    Route::get('/barang/export', [BarangController::class, 'export'])->name('barang.export');
+    Route::get('/barang/import/template', [BarangController::class, 'importTemplate'])->name('barang.import.template');
+    Route::get('/barang/import', [BarangController::class, 'importForm'])->name('barang.import.form');
+    Route::post('/barang/import', [BarangController::class, 'import'])->name('barang.import');
+
     Route::resource('barang', BarangController::class);
     Route::resource('ruangan', RuanganController::class);
     Route::resource('kategori', KategoriController::class);
